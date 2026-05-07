@@ -1259,3 +1259,381 @@ document.addEventListener("change", (event) => {
 injectUpgradeCss();
 renderAll();
 renderAdminPanel();
+
+/* =================================================
+   DPL 2.0 ADMIN UPGRADE PACK
+   Paste at END of script.js
+================================================= */
+
+function ensureCriteriaStructure() {
+  if (!dplData.scoring.battingRules) {
+    dplData.scoring.battingRules = [
+      { label: "Referral", value: "1 Run", points: 1, accent: "green" },
+      { label: "Visitor", value: "4 Runs", points: 4, accent: "orange" },
+      { label: "Closed Business", value: "6 Runs", points: 6, accent: "red" },
+    ];
+  }
+
+  if (!dplData.scoring.bowlingRules) {
+    dplData.scoring.bowlingRules = [
+      { label: "No referral", value: "1 Wicket", points: 1, accent: "purple" },
+      { label: "Absent", value: "1 Wicket", points: 1, accent: "purple" },
+    ];
+  }
+
+  dplData.weeklyMatches.forEach((match) => {
+    if (!match.battingTeam) match.battingTeam = match.teamA;
+    if (!match.bowlingTeam) match.bowlingTeam = match.teamB;
+  });
+}
+
+function renderCriteriaEditorRow(rule, index, type) {
+  return `
+    <div class="admin-row">
+      ${field("Criteria", `${type}-${index}-label`, rule.label)}
+      ${field("Display", `${type}-${index}-value`, rule.value)}
+      ${field("Points", `${type}-${index}-points`, rule.points, "number")}
+      ${field("Accent", `${type}-${index}-accent`, rule.accent)}
+      <button class="icon-btn danger" type="button" data-remove-criteria="${type}" data-index="${index}">
+        Remove
+      </button>
+    </div>
+  `;
+}
+
+function renderLiveMatchEditorRow(fixture, index) {
+  return `
+    <div class="admin-row admin-row-fixture">
+      ${field("Week", `weekly-${index}-week`, fixture.week, "number")}
+      ${field("Match No", `weekly-${index}-matchNo`, fixture.matchNo, "number")}
+
+      ${field("Team A", `weekly-${index}-teamA`, fixture.teamA)}
+      ${field("A Runs", `weekly-${index}-teamARuns`, fixture.teamARuns, "number")}
+      ${field("A Wickets", `weekly-${index}-teamAWickets`, fixture.teamAWickets, "number")}
+
+      ${field("Team B", `weekly-${index}-teamB`, fixture.teamB)}
+      ${field("B Runs", `weekly-${index}-teamBRuns`, fixture.teamBRuns, "number")}
+      ${field("B Wickets", `weekly-${index}-teamBWickets`, fixture.teamBWickets, "number")}
+
+      ${field("Batting Team", `weekly-${index}-battingTeam`, fixture.battingTeam || fixture.teamA)}
+      ${field("Bowling Team", `weekly-${index}-bowlingTeam`, fixture.bowlingTeam || fixture.teamB)}
+
+      ${field("Day", `weekly-${index}-day`, fixture.day, "number")}
+
+      <label class="field checkbox-field">
+        <input type="checkbox" id="weekly-${index}-powerplay" ${fixture.powerplay ? "checked" : ""} />
+        <span>Powerplay Active</span>
+      </label>
+
+      <button class="mini-btn" type="button" data-complete-match="${index}">
+        Complete Match
+      </button>
+
+      <button class="icon-btn danger" type="button" data-remove-live-match="${index}">
+        Remove Match
+      </button>
+    </div>
+  `;
+}
+
+function addLiveMatch() {
+  dplData.weeklyMatches.push({
+    week: 1,
+    matchNo: dplData.weeklyMatches.length + 1,
+    teamA: "Team A",
+    teamB: "Team B",
+    battingTeam: "Team A",
+    bowlingTeam: "Team B",
+    teamARuns: 0,
+    teamAWickets: 0,
+    teamBRuns: 0,
+    teamBWickets: 0,
+    day: 1,
+    powerplay: false,
+    status: "Live",
+    performances: [],
+  });
+
+  saveLeagueData();
+  renderAll();
+  renderAdminPanel("Live match added.");
+}
+
+function completeLiveMatch(index) {
+  dplData = collectAdminFormData();
+
+  const match = dplData.weeklyMatches[index];
+  if (!match) return;
+
+  const completed = {
+    ...match,
+    status: "Completed",
+    day: 6,
+    powerplay: false,
+    result: getMatchResult(match),
+  };
+
+  dplData.completedMatches.unshift(completed);
+  dplData.weeklyMatches.splice(index, 1);
+
+  dplData.weeklyMatches = dplData.weeklyMatches.map((m, i) => ({
+    ...m,
+    matchNo: i + 1,
+  }));
+
+  saveLeagueData();
+  renderAll();
+  renderAdminPanel("Match completed and moved to Previous Matches.");
+  showToast("Match moved to Previous Matches");
+}
+
+function addCriteria(type) {
+  ensureCriteriaStructure();
+
+  const newRule = {
+    label: "New Criteria",
+    value: type === "battingRules" ? "1 Run" : "1 Wicket",
+    points: 1,
+    accent: type === "battingRules" ? "orange" : "purple",
+  };
+
+  dplData.scoring[type].push(newRule);
+  saveLeagueData();
+  renderAll();
+  renderAdminPanel("Criteria added.");
+}
+
+function removeCriteria(type, index) {
+  ensureCriteriaStructure();
+
+  dplData.scoring[type].splice(index, 1);
+  saveLeagueData();
+  renderAll();
+  renderAdminPanel("Criteria removed.");
+}
+
+const oldCollectAdminFormData = collectAdminFormData;
+
+collectAdminFormData = function () {
+  ensureCriteriaStructure();
+
+  const data = oldCollectAdminFormData();
+
+  data.scoring = {
+    ...data.scoring,
+    battingRules: dplData.scoring.battingRules.map((rule, index) => ({
+      label: getValue(`battingRules-${index}-label`, rule.label),
+      value: getValue(`battingRules-${index}-value`, rule.value),
+      points: getNumber(`battingRules-${index}-points`, rule.points),
+      accent: getValue(`battingRules-${index}-accent`, rule.accent),
+    })),
+    bowlingRules: dplData.scoring.bowlingRules.map((rule, index) => ({
+      label: getValue(`bowlingRules-${index}-label`, rule.label),
+      value: getValue(`bowlingRules-${index}-value`, rule.value),
+      points: getNumber(`bowlingRules-${index}-points`, rule.points),
+      accent: getValue(`bowlingRules-${index}-accent`, rule.accent),
+    })),
+  };
+
+  data.weeklyMatches = dplData.weeklyMatches.map((fixture, index) => ({
+    ...fixture,
+    week: getNumber(`weekly-${index}-week`, fixture.week),
+    matchNo: getNumber(`weekly-${index}-matchNo`, fixture.matchNo),
+    teamA: getValue(`weekly-${index}-teamA`, fixture.teamA),
+    teamB: getValue(`weekly-${index}-teamB`, fixture.teamB),
+    teamARuns: getNumber(`weekly-${index}-teamARuns`, fixture.teamARuns),
+    teamAWickets: getNumber(`weekly-${index}-teamAWickets`, fixture.teamAWickets),
+    teamBRuns: getNumber(`weekly-${index}-teamBRuns`, fixture.teamBRuns),
+    teamBWickets: getNumber(`weekly-${index}-teamBWickets`, fixture.teamBWickets),
+    battingTeam: getValue(`weekly-${index}-battingTeam`, fixture.battingTeam || fixture.teamA),
+    bowlingTeam: getValue(`weekly-${index}-bowlingTeam`, fixture.bowlingTeam || fixture.teamB),
+    day: clamp(getNumber(`weekly-${index}-day`, fixture.day), 1, 6),
+    powerplay: Boolean(document.getElementById(`weekly-${index}-powerplay`)?.checked),
+    status: "Live",
+  }));
+
+  return data;
+};
+
+renderAdminPanel = function (message = "") {
+  ensureCriteriaStructure();
+
+  const form = document.querySelector("#adminForm");
+  if (!form) return;
+
+  if (!isAdminAuthed()) {
+    renderAdminLogin(message);
+    return;
+  }
+
+  form.innerHTML = `
+    <div class="admin-toolbar">
+      <div>
+        <p class="eyebrow">DPL 2.0 Admin</p>
+        <h2>League Control Panel</h2>
+      </div>
+      <div class="admin-toolbar-actions">
+        <div class="admin-status" id="adminStatus">${escapeHtml(message)}</div>
+        <button class="mini-btn" type="button" id="exportBackupBtn">Export Backup</button>
+        <button class="mini-btn" type="button" id="logoutAdmin">Logout</button>
+      </div>
+    </div>
+
+    <section class="admin-panel-card">
+      <div class="admin-section-title"><span>01</span><h3>Live Matches</h3></div>
+      <p class="admin-helper">
+        Add/remove live matches, change batting/bowling team anytime, and complete matches to move them to Previous Matches.
+      </p>
+      <div class="admin-rows">
+        ${dplData.weeklyMatches.map(renderLiveMatchEditorRow).join("")}
+      </div>
+      <button class="mini-btn" type="button" id="addLiveMatch">Add Live Match</button>
+    </section>
+
+    <section class="admin-panel-card">
+      <div class="admin-section-title"><span>02</span><h3>Batting Scoring Criteria</h3></div>
+      <div class="admin-rows">
+        ${dplData.scoring.battingRules.map((rule, index) =>
+          renderCriteriaEditorRow(rule, index, "battingRules")
+        ).join("")}
+      </div>
+      <button class="mini-btn" type="button" data-add-criteria="battingRules">Add Batting Criteria</button>
+    </section>
+
+    <section class="admin-panel-card">
+      <div class="admin-section-title"><span>03</span><h3>Bowling / Wicket Criteria</h3></div>
+      <div class="admin-rows">
+        ${dplData.scoring.bowlingRules.map((rule, index) =>
+          renderCriteriaEditorRow(rule, index, "bowlingRules")
+        ).join("")}
+      </div>
+      <button class="mini-btn" type="button" data-add-criteria="bowlingRules">Add Bowling Criteria</button>
+    </section>
+
+    <section class="admin-panel-card">
+      <div class="admin-section-title"><span>04</span><h3>Leaderboard</h3></div>
+      <div class="admin-rows">
+        ${dplData.leaderboard.map(renderLeaderboardEditorRow).join("")}
+      </div>
+    </section>
+
+    <section class="admin-panel-card">
+      <div class="admin-section-title"><span>05</span><h3>Caps & Awards</h3></div>
+      <div class="admin-rows">
+        ${dplData.players.map(renderPlayerEditorRow).join("")}
+      </div>
+    </section>
+
+    <section class="admin-panel-card">
+      <div class="admin-section-title"><span>06</span><h3>Teams</h3></div>
+      <div class="admin-rows">
+        ${dplData.teams.map(renderTeamEditorRow).join("")}
+      </div>
+    </section>
+
+    <section class="admin-panel-card">
+      <div class="admin-section-title"><span>07</span><h3>Commentary Feed</h3></div>
+      <div class="admin-rows">
+        ${dplData.commentary.map(renderCommentaryEditorRow).join("")}
+      </div>
+    </section>
+
+    <div class="admin-actions">
+      <button class="btn btn-live" type="submit">Save Updates</button>
+      <button class="btn btn-outline" type="button" id="resetData">Reset Demo Data</button>
+    </div>
+  `;
+
+  form.onsubmit = handleAdminSubmit;
+  form.onclick = handleAdminClick;
+};
+
+const oldHandleAdminClick = handleAdminClick;
+
+handleAdminClick = function (event) {
+  const completeBtn = event.target.closest("[data-complete-match]");
+  if (completeBtn) {
+    completeLiveMatch(Number(completeBtn.dataset.completeMatch));
+    return;
+  }
+
+  const removeLiveBtn = event.target.closest("[data-remove-live-match]");
+  if (removeLiveBtn) {
+    dplData = collectAdminFormData();
+    dplData.weeklyMatches.splice(Number(removeLiveBtn.dataset.removeLiveMatch), 1);
+    saveLeagueData();
+    renderAll();
+    renderAdminPanel("Live match removed.");
+    return;
+  }
+
+  const addLiveBtn = event.target.closest("#addLiveMatch");
+  if (addLiveBtn) {
+    dplData = collectAdminFormData();
+    addLiveMatch();
+    return;
+  }
+
+  const addCriteriaBtn = event.target.closest("[data-add-criteria]");
+  if (addCriteriaBtn) {
+    dplData = collectAdminFormData();
+    addCriteria(addCriteriaBtn.dataset.addCriteria);
+    return;
+  }
+
+  const removeCriteriaBtn = event.target.closest("[data-remove-criteria]");
+  if (removeCriteriaBtn) {
+    dplData = collectAdminFormData();
+    removeCriteria(
+      removeCriteriaBtn.dataset.removeCriteria,
+      Number(removeCriteriaBtn.dataset.index)
+    );
+    return;
+  }
+
+  oldHandleAdminClick(event);
+};
+
+renderScoringRules = function () {
+  ensureCriteriaStructure();
+
+  const rulesGrid = document.querySelector("#scoringRulesGrid");
+  const formula = document.querySelector("#scoringFormula");
+
+  if (rulesGrid) {
+    rulesGrid.innerHTML = `
+      <article class="score-tile accent-blue">
+        <span>Batting</span>
+        <strong>Run Scoring</strong>
+      </article>
+
+      ${dplData.scoring.battingRules.map(rule => `
+        <article class="score-tile accent-${escapeHtml(rule.accent)}">
+          <span>${escapeHtml(rule.value)}</span>
+          <strong>${escapeHtml(rule.label)}</strong>
+        </article>
+      `).join("")}
+
+      <article class="score-tile accent-purple">
+        <span>Bowling</span>
+        <strong>Wickets / Pressure</strong>
+      </article>
+
+      ${dplData.scoring.bowlingRules.map(rule => `
+        <article class="score-tile accent-${escapeHtml(rule.accent)}">
+          <span>${escapeHtml(rule.value)}</span>
+          <strong>${escapeHtml(rule.label)}</strong>
+        </article>
+      `).join("")}
+    `;
+  }
+
+  if (formula) {
+    formula.textContent = `${dplData.scoring.finalFormula} | Batting Powerplay = ${dplData.scoring.powerplayMultiplier}X Runs`;
+  }
+};
+
+ensureCriteriaStructure();
+saveLeagueData(false);
+renderAll();
+renderAdminPanel("Admin upgraded.");

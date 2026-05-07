@@ -3,25 +3,150 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DPL Live Dashboard</title>
+    <title>DPL 2.0 Live Dashboard</title>
+
+    <meta
+      name="description"
+      content="Live scoreboard, leaderboard, caps, fixtures and commentary for Diorite Premier League 2.0."
+    />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Rajdhani:wght@600;700&display=swap"
       rel="stylesheet"
     />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&display=swap"
-      rel="stylesheet"
-    />
+
     <link rel="stylesheet" href="style.css" />
+
+    <style>
+      .mobile-score-note {
+        display: none;
+      }
+
+      .dashboard-hero {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+      }
+
+      .dashboard-hero h1 {
+        max-width: 760px;
+      }
+
+      .dashboard-top-actions {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .scoreboard-shell {
+        position: sticky;
+        top: 88px;
+        z-index: 50;
+      }
+
+      .loading-card {
+        padding: 28px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #aab4c0;
+        text-align: center;
+      }
+
+      .quick-dashboard-strip {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+        margin-top: 18px;
+      }
+
+      .quick-stat {
+        padding: 16px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .quick-stat span {
+        display: block;
+        font-size: 12px;
+        color: #9ba6b2;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .quick-stat strong {
+        display: block;
+        margin-top: 6px;
+        font-size: 22px;
+        font-family: "Rajdhani", sans-serif;
+      }
+
+      @media (max-width: 768px) {
+        .dashboard-hero {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .dashboard-top-actions {
+          width: 100%;
+          justify-content: space-between;
+        }
+
+        .scoreboard-shell {
+          position: relative;
+          top: auto;
+        }
+
+        .mobile-score-note {
+          display: block;
+          margin-top: 10px;
+          color: #9ba6b2;
+          font-size: 13px;
+        }
+
+        .quick-dashboard-strip {
+          grid-template-columns: repeat(2, 1fr);
+        }
+
+        .dashboard-grid {
+          grid-template-columns: 1fr !important;
+        }
+
+        .split-heading {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .table-wrap {
+          overflow-x: auto;
+        }
+
+        table {
+          min-width: 560px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .quick-dashboard-strip {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
   </head>
+
   <body>
     <header class="site-header">
-      <a class="brand" href="index.html" aria-label="Diorite Premier League home">
+      <a class="brand" href="index.html" aria-label="Diorite Premier League 2.0 home">
         <span class="brand-mark">DPL</span>
-        <span>Diorite Premier League</span>
+        <span>Diorite Premier League 2.0</span>
       </a>
+
       <nav class="nav-links" aria-label="Primary navigation">
         <a href="index.html">Home</a>
         <a href="dashboard.html" aria-current="page">Live Dashboard</a>
@@ -32,14 +157,47 @@
     <main>
       <section class="dashboard-hero section-shell reveal">
         <div>
-          <p class="eyebrow">DPL Broadcast Center</p>
-          <h1>Live score, table, caps, teams, and commentary.</h1>
+          <p class="eyebrow">DPL 2.0 Broadcast Center</p>
+          <h1>Live scoreboard, league table, caps, teams, results and commentary.</h1>
+          <p class="mobile-score-note">
+            Best viewed on mobile during live match updates.
+          </p>
         </div>
-        <span class="live-badge" aria-label="Live status">LIVE</span>
+
+        <div class="dashboard-top-actions">
+          <span class="live-badge" aria-label="Live status">LIVE</span>
+          <a class="btn btn-outline" href="admin.html">Update Scores</a>
+        </div>
       </section>
 
-      <section class="section-shell reveal">
-        <div class="broadcast-scoreboard" id="scoreboard" aria-live="polite"></div>
+      <section class="section-shell reveal scoreboard-shell">
+        <div
+          class="broadcast-scoreboard"
+          id="scoreboard"
+          aria-live="polite"
+          aria-label="Live match scoreboard"
+        >
+          <div class="loading-card">Loading live scoreboard...</div>
+        </div>
+
+        <div class="quick-dashboard-strip" aria-label="Quick match highlights">
+          <div class="quick-stat">
+            <span>Format</span>
+            <strong>6 Days</strong>
+          </div>
+          <div class="quick-stat">
+            <span>Powerplay</span>
+            <strong>Day 1 & 4</strong>
+          </div>
+          <div class="quick-stat">
+            <span>Matches</span>
+            <strong>12 Total</strong>
+          </div>
+          <div class="quick-stat">
+            <span>Teams</span>
+            <strong>4 Squads</strong>
+          </div>
+        </div>
       </section>
 
       <section class="section-shell reveal">
@@ -50,18 +208,24 @@
           </div>
           <span class="powerplay-chip">2 Matches / Week</span>
         </div>
-        <div class="weekly-fixtures" id="weeklyFixtures"></div>
+
+        <div class="weekly-fixtures" id="weeklyFixtures">
+          <div class="loading-card">Loading fixtures...</div>
+        </div>
       </section>
 
       <section class="section-shell reveal">
         <div class="section-heading split-heading">
           <div>
             <p class="eyebrow">Completed Results</p>
-            <h2>Past match results and detailed player performances.</h2>
+            <h2>Past match results and player performances.</h2>
           </div>
           <span class="powerplay-chip">Result Scorecards</span>
         </div>
-        <div class="weekly-fixtures" id="completedMatches"></div>
+
+        <div class="weekly-fixtures" id="completedMatches">
+          <div class="loading-card">Loading completed matches...</div>
+        </div>
       </section>
 
       <section class="section-shell dashboard-grid reveal">
@@ -70,18 +234,23 @@
             <p class="eyebrow">Leaderboard</p>
             <h2>League Table</h2>
           </div>
+
           <div class="table-wrap">
-            <table>
+            <table aria-label="DPL 2.0 leaderboard">
               <thead>
                 <tr>
-                  <th>Team Name</th>
-                  <th>Matches</th>
-                  <th>Wins</th>
-                  <th>Points</th>
+                  <th>Team</th>
+                  <th>M</th>
+                  <th>W</th>
+                  <th>PTS</th>
                   <th>NRR</th>
                 </tr>
               </thead>
-              <tbody id="leaderboardBody"></tbody>
+              <tbody id="leaderboardBody">
+                <tr>
+                  <td colspan="5">Loading leaderboard...</td>
+                </tr>
+              </tbody>
             </table>
           </div>
         </div>
@@ -91,7 +260,10 @@
             <p class="eyebrow">Player Stats</p>
             <h2>Caps & Awards</h2>
           </div>
-          <div class="caps-stack" id="capsStack"></div>
+
+          <div class="caps-stack" id="capsStack">
+            <div class="loading-card">Loading caps...</div>
+          </div>
         </aside>
       </section>
 
@@ -101,22 +273,33 @@
             <p class="eyebrow">Commentary</p>
             <h2>Live moments from the DPL box.</h2>
           </div>
-          <span class="powerplay-chip">Auto Scroll</span>
+          <span class="powerplay-chip">Live Feed</span>
         </div>
-        <div class="commentary-feed" id="commentaryFeed" aria-live="polite"></div>
+
+        <div
+          class="commentary-feed"
+          id="commentaryFeed"
+          aria-live="polite"
+          aria-label="Live commentary feed"
+        >
+          <div class="loading-card">Loading commentary...</div>
+        </div>
       </section>
 
       <section class="section-shell reveal" id="teams">
         <div class="section-heading">
           <p class="eyebrow">Teams</p>
-          <h2>Four squads chasing the DPL title.</h2>
+          <h2>Four squads chasing the DPL 2.0 title.</h2>
         </div>
-        <div class="teams-grid" id="teamsGrid"></div>
+
+        <div class="teams-grid" id="teamsGrid">
+          <div class="loading-card">Loading teams...</div>
+        </div>
       </section>
     </main>
 
     <footer class="site-footer">
-      <span>Diorite Premier League</span>
+      <span>© 2026 Diorite Premier League 2.0</span>
       <a href="admin.html">Admin Panel</a>
     </footer>
 

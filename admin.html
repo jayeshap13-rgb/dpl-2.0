@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DPL Admin Panel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="Diorite Premier League home">
+        <span class="brand-mark">DPL</span>
+        <span>Diorite Premier League</span>
+      </a>
+      <nav class="nav-links" aria-label="Primary navigation">
+        <a href="index.html">Home</a>
+        <a href="dashboard.html">Live Dashboard</a>
+        <a href="admin.html" aria-current="page">Admin Panel</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="admin-hero section-shell reveal">
+        <div>
+          <p class="eyebrow">Admin Panel</p>
+          <h1>Update the DPL broadcast from one control room.</h1>
+          <p class="admin-note">
+            Password access and changes are stored in this browser with localStorage. No backend or database is required.
+          </p>
+        </div>
+        <div class="admin-page-actions">
+          <a class="btn btn-live" href="dashboard.html">View Dashboard</a>
+          <a class="btn btn-outline" href="index.html">View Home</a>
+        </div>
+      </section>
+
+      <section class="section-shell reveal">
+        <form class="admin-form" id="adminForm"></form>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>Diorite Premier League</span>
+      <a href="dashboard.html">Live Dashboard</a>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>

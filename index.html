@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Diorite Premier League</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="Diorite Premier League home">
+        <span class="brand-mark">DPL</span>
+        <span>Diorite Premier League</span>
+      </a>
+      <nav class="nav-links" aria-label="Primary navigation">
+        <a href="index.html" aria-current="page">Home</a>
+        <a href="dashboard.html">Live Dashboard</a>
+        <a href="admin.html">Admin Panel</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="home-hero">
+        <div class="stadium-lights" aria-hidden="true"></div>
+        <div class="section-shell hero-grid">
+          <div class="hero-content reveal">
+            <p class="eyebrow" id="heroEyebrow">Business Cricket League</p>
+            <h1 class="glow-title" id="leagueTitle">Diorite Premier League</h1>
+            <p class="hero-subtitle" id="leagueSubtitle">Where Networking Meets Competition</p>
+            <div class="fixture-strip" id="fixtureStrip" aria-label="League dates">
+              <div>
+                <span>Auction</span>
+                <strong>15 May</strong>
+              </div>
+              <div>
+                <span>League Start</span>
+                <strong>19 May</strong>
+              </div>
+              <div>
+                <span>Finale</span>
+                <strong>Cricket Match</strong>
+              </div>
+            </div>
+            <div class="hero-actions">
+              <a class="btn btn-live" href="dashboard.html">LIVE DASHBOARD</a>
+              <a class="btn btn-outline" href="#rules">VIEW RULES</a>
+            </div>
+          </div>
+          <aside class="broadcast-card reveal delay-1" aria-label="DPL live broadcast preview">
+            <div class="broadcast-topline">
+              <span class="live-dot">LIVE</span>
+              <span>DPL Network</span>
+            </div>
+            <div class="broadcast-score" id="homeBroadcastScore">
+              <span>48<span class="wicket">/3</span></span>
+              <small>Day 2 Powerplay</small>
+            </div>
+            <div class="broadcast-lower" id="homeBroadcastLower">
+              <strong>36 Players</strong>
+              <span>4 teams. 6 weeks. One champion.</span>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section-shell reveal">
+        <div class="section-heading split-heading">
+          <div>
+            <p class="eyebrow">This Week Live Scores</p>
+            <h2>Two matches running across all four DPL teams.</h2>
+          </div>
+          <span class="powerplay-chip">Tap Score For Details</span>
+        </div>
+        <div class="weekly-fixtures" id="homeWeeklyFixtures"></div>
+      </section>
+
+      <section class="section-shell reveal">
+        <div class="section-heading split-heading">
+          <div>
+            <p class="eyebrow">Completed Results</p>
+            <h2>Finished DPL matches with full member scorecards.</h2>
+          </div>
+          <span class="powerplay-chip">Tap Result For Details</span>
+        </div>
+        <div class="weekly-fixtures" id="homeCompletedMatches"></div>
+      </section>
+
+      <section class="section-shell reveal" id="overview">
+        <div class="section-heading">
+          <p class="eyebrow">League Overview</p>
+          <h2>Auction drama, business runs, and a cricket finale.</h2>
+        </div>
+        <div class="overview-grid" id="overviewGrid">
+          <article class="glass-stat">
+            <span class="stat-number">36</span>
+            <strong>Players</strong>
+          </article>
+          <article class="glass-stat">
+            <span class="stat-number">4</span>
+            <strong>Teams</strong>
+          </article>
+          <article class="glass-stat">
+            <span class="stat-number">Bid</span>
+            <strong>Auction System</strong>
+          </article>
+          <article class="glass-stat">
+            <span class="stat-number">6</span>
+            <strong>Weeks League</strong>
+          </article>
+        </div>
+      </section>
+
+      <section class="section-shell reveal" id="auction">
+        <div class="section-heading split-heading">
+          <div>
+            <p class="eyebrow">Auction Cards</p>
+            <h2>Player profiles with roles and form ratings.</h2>
+          </div>
+          <a class="text-link" href="dashboard.html#teams">Team Rooms</a>
+        </div>
+        <div class="player-grid" id="auctionPlayers" aria-live="polite"></div>
+      </section>
+
+      <section class="section-shell reveal" id="format">
+        <div class="section-heading">
+          <p class="eyebrow">Match Format</p>
+          <h2>Six days, two innings, broadcast-style momentum.</h2>
+        </div>
+        <div class="timeline">
+          <article class="timeline-card">
+            <span class="day-pill">Weekly</span>
+            <strong>2 Matches</strong>
+            <small>All 4 teams play each week across two fixtures.</small>
+          </article>
+          <article class="timeline-card powerplay">
+            <span class="day-pill">Day 1</span>
+            <strong>POWERPLAY - 2X RUNS</strong>
+            <small>Team A batting starts with boosted scoring.</small>
+          </article>
+          <article class="timeline-card">
+            <span class="day-pill">Day 2-3</span>
+            <strong>Team A Batting</strong>
+            <small>Runs build through referrals, visitors, and business.</small>
+          </article>
+          <article class="timeline-card powerplay">
+            <span class="day-pill">Day 4</span>
+            <strong>POWERPLAY - 2X RUNS</strong>
+            <small>Team B opens its chase under the lights.</small>
+          </article>
+          <article class="timeline-card">
+            <span class="day-pill">Day 5-6</span>
+            <strong>Team B Batting</strong>
+            <small>The final innings decides the winner.</small>
+          </article>
+        </div>
+      </section>
+
+      <section class="section-shell reveal" id="rules">
+        <div class="section-heading">
+          <p class="eyebrow">Scoring System</p>
+          <h2>Every action hits the scoreboard.</h2>
+        </div>
+        <div class="score-tile-grid" id="scoringRulesGrid"></div>
+        <div class="formula-ribbon" id="scoringFormula">Final Score = Runs - (Wickets x 2)</div>
+      </section>
+
+      <section class="section-shell reveal" id="awards">
+        <div class="section-heading">
+          <p class="eyebrow">Awards</p>
+          <h2>IPL-style caps for the league standouts.</h2>
+        </div>
+        <div class="award-grid">
+          <article class="award-card orange">
+            <span class="award-badge">Orange Cap</span>
+            <strong>Top Runs</strong>
+          </article>
+          <article class="award-card blue">
+            <span class="award-badge">Power Player</span>
+            <strong>Most Visitors</strong>
+          </article>
+          <article class="award-card purple">
+            <span class="award-badge">Finisher</span>
+            <strong>Closures</strong>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>Diorite Premier League</span>
+      <a href="admin.html">Admin Panel</a>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>

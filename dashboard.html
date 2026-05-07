@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DPL Live Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="Diorite Premier League home">
+        <span class="brand-mark">DPL</span>
+        <span>Diorite Premier League</span>
+      </a>
+      <nav class="nav-links" aria-label="Primary navigation">
+        <a href="index.html">Home</a>
+        <a href="dashboard.html" aria-current="page">Live Dashboard</a>
+        <a href="admin.html">Admin Panel</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="dashboard-hero section-shell reveal">
+        <div>
+          <p class="eyebrow">DPL Broadcast Center</p>
+          <h1>Live score, table, caps, teams, and commentary.</h1>
+        </div>
+        <span class="live-badge" aria-label="Live status">LIVE</span>
+      </section>
+
+      <section class="section-shell reveal">
+        <div class="broadcast-scoreboard" id="scoreboard" aria-live="polite"></div>
+      </section>
+
+      <section class="section-shell reveal">
+        <div class="section-heading split-heading">
+          <div>
+            <p class="eyebrow">Weekly Fixtures</p>
+            <h2>Two matches. Four teams. One DPL week.</h2>
+          </div>
+          <span class="powerplay-chip">2 Matches / Week</span>
+        </div>
+        <div class="weekly-fixtures" id="weeklyFixtures"></div>
+      </section>
+
+      <section class="section-shell reveal">
+        <div class="section-heading split-heading">
+          <div>
+            <p class="eyebrow">Completed Results</p>
+            <h2>Past match results and detailed player performances.</h2>
+          </div>
+          <span class="powerplay-chip">Result Scorecards</span>
+        </div>
+        <div class="weekly-fixtures" id="completedMatches"></div>
+      </section>
+
+      <section class="section-shell dashboard-grid reveal">
+        <div>
+          <div class="section-heading compact">
+            <p class="eyebrow">Leaderboard</p>
+            <h2>League Table</h2>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Team Name</th>
+                  <th>Matches</th>
+                  <th>Wins</th>
+                  <th>Points</th>
+                  <th>NRR</th>
+                </tr>
+              </thead>
+              <tbody id="leaderboardBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <aside>
+          <div class="section-heading compact">
+            <p class="eyebrow">Player Stats</p>
+            <h2>Caps & Awards</h2>
+          </div>
+          <div class="caps-stack" id="capsStack"></div>
+        </aside>
+      </section>
+
+      <section class="section-shell reveal">
+        <div class="section-heading split-heading">
+          <div>
+            <p class="eyebrow">Commentary</p>
+            <h2>Live moments from the DPL box.</h2>
+          </div>
+          <span class="powerplay-chip">Auto Scroll</span>
+        </div>
+        <div class="commentary-feed" id="commentaryFeed" aria-live="polite"></div>
+      </section>
+
+      <section class="section-shell reveal" id="teams">
+        <div class="section-heading">
+          <p class="eyebrow">Teams</p>
+          <h2>Four squads chasing the DPL title.</h2>
+        </div>
+        <div class="teams-grid" id="teamsGrid"></div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>Diorite Premier League</span>
+      <a href="admin.html">Admin Panel</a>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>

@@ -3,25 +3,252 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Diorite Premier League</title>
+    <title>Diorite Premier League 2.0</title>
+
+    <meta
+      name="description"
+      content="Diorite Premier League 2.0 — live scores, auction, teams, rules, results and awards."
+    />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Rajdhani:wght@600;700&display=swap"
       rel="stylesheet"
     />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&display=swap"
-      rel="stylesheet"
-    />
+
     <link rel="stylesheet" href="style.css" />
+
+    <style>
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        overflow-x: hidden;
+      }
+
+      .home-hero {
+        position: relative;
+        min-height: 88vh;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+      }
+
+      .hero-overlay {
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(circle at top, rgba(255, 106, 0, 0.18), transparent 45%),
+          radial-gradient(circle at right, rgba(123, 47, 247, 0.18), transparent 45%),
+          linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(3, 8, 18, 0.92));
+        z-index: 1;
+        pointer-events: none;
+      }
+
+      .hero-grid,
+      .hero-content,
+      .broadcast-card {
+        position: relative;
+        z-index: 2;
+      }
+
+      .glow-title {
+        font-family: "Rajdhani", sans-serif;
+        font-size: clamp(52px, 8vw, 104px);
+        line-height: 0.92;
+        background: linear-gradient(135deg, #ffffff, #ff6a00);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 34px rgba(255, 106, 0, 0.24);
+      }
+
+      .hero-subtitle {
+        max-width: 620px;
+      }
+
+      .broadcast-card {
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.035));
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 0 38px rgba(255, 106, 0, 0.18);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .broadcast-card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.08));
+        pointer-events: none;
+      }
+
+      .live-dot {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #ff4d4d;
+        font-weight: 800;
+      }
+
+      .live-dot::before {
+        content: "";
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #ff1f1f;
+        box-shadow: 0 0 12px rgba(255, 0, 0, 0.8);
+        animation: dplPulse 1s infinite;
+      }
+
+      @keyframes dplPulse {
+        0% {
+          opacity: 0.45;
+          transform: scale(0.9);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1.15);
+        }
+        100% {
+          opacity: 0.45;
+          transform: scale(0.9);
+        }
+      }
+
+      .weekly-fixtures {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 22px;
+      }
+
+      .fixture-card,
+      .match-card,
+      .result-card,
+      .player-card,
+      .timeline-card,
+      .award-card,
+      .glass-stat {
+        transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+      }
+
+      .fixture-card:hover,
+      .match-card:hover,
+      .result-card:hover,
+      .player-card:hover,
+      .timeline-card:hover,
+      .award-card:hover,
+      .glass-stat:hover {
+        transform: translateY(-5px);
+        border-color: rgba(255, 106, 0, 0.35);
+        box-shadow: 0 0 34px rgba(255, 106, 0, 0.16);
+      }
+
+      .award-card {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .award-card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.08));
+        pointer-events: none;
+      }
+
+      .sticky-live-bar {
+        position: fixed;
+        left: 16px;
+        right: 16px;
+        bottom: 16px;
+        z-index: 9999;
+        padding: 13px 18px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #ff6a00, #7b2ff7);
+        color: white;
+        font-weight: 900;
+        text-align: center;
+        box-shadow: 0 0 28px rgba(255, 106, 0, 0.35);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+      }
+
+      table {
+        min-width: 560px;
+      }
+
+      @media (max-width: 768px) {
+        .home-hero {
+          min-height: auto;
+          padding: 42px 0 28px;
+        }
+
+        .hero-grid {
+          grid-template-columns: 1fr !important;
+          gap: 28px;
+        }
+
+        .glow-title {
+          font-size: clamp(46px, 15vw, 72px);
+        }
+
+        .fixture-strip {
+          grid-template-columns: 1fr;
+        }
+
+        .hero-actions {
+          flex-direction: column;
+          width: 100%;
+        }
+
+        .hero-actions .btn {
+          width: 100%;
+          justify-content: center;
+        }
+
+        .split-heading {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 14px;
+        }
+
+        .weekly-fixtures {
+          grid-template-columns: 1fr;
+        }
+
+        .timeline {
+          grid-template-columns: 1fr;
+        }
+
+        .sticky-live-bar {
+          left: 10px;
+          right: 10px;
+          bottom: 10px;
+          font-size: 13px;
+          border-radius: 18px;
+        }
+
+        .site-footer {
+          padding-bottom: 78px;
+        }
+      }
+    </style>
   </head>
+
   <body>
     <header class="site-header">
-      <a class="brand" href="index.html" aria-label="Diorite Premier League home">
+      <a class="brand" href="index.html" aria-label="Diorite Premier League 2.0 home">
         <span class="brand-mark">DPL</span>
-        <span>Diorite Premier League</span>
+        <span>Diorite Premier League 2.0</span>
       </a>
+
       <nav class="nav-links" aria-label="Primary navigation">
         <a href="index.html" aria-current="page">Home</a>
         <a href="dashboard.html">Live Dashboard</a>
@@ -32,42 +259,54 @@
     <main>
       <section class="home-hero">
         <div class="stadium-lights" aria-hidden="true"></div>
+        <div class="hero-overlay" aria-hidden="true"></div>
+
         <div class="section-shell hero-grid">
           <div class="hero-content reveal">
             <p class="eyebrow" id="heroEyebrow">Business Cricket League</p>
-            <h1 class="glow-title" id="leagueTitle">Diorite Premier League</h1>
-            <p class="hero-subtitle" id="leagueSubtitle">Where Networking Meets Competition</p>
+
+            <h1 class="glow-title" id="leagueTitle">Diorite Premier League 2.0</h1>
+
+            <p class="hero-subtitle" id="leagueSubtitle">
+              Where networking meets competition — auction, live scores, powerplays,
+              caps, wickets and a cricket-style finale.
+            </p>
+
             <div class="fixture-strip" id="fixtureStrip" aria-label="League dates">
               <div>
                 <span>Auction</span>
-                <strong>15 May</strong>
+                <strong>15 May 2026</strong>
               </div>
               <div>
                 <span>League Start</span>
-                <strong>19 May</strong>
+                <strong>19 May 2026</strong>
               </div>
               <div>
-                <span>Finale</span>
-                <strong>Cricket Match</strong>
+                <span>Format</span>
+                <strong>6 Weeks • 12 Matches</strong>
               </div>
             </div>
+
             <div class="hero-actions">
               <a class="btn btn-live" href="dashboard.html">LIVE DASHBOARD</a>
               <a class="btn btn-outline" href="#rules">VIEW RULES</a>
             </div>
           </div>
+
           <aside class="broadcast-card reveal delay-1" aria-label="DPL live broadcast preview">
             <div class="broadcast-topline">
               <span class="live-dot">LIVE</span>
               <span>DPL Network</span>
             </div>
+
             <div class="broadcast-score" id="homeBroadcastScore">
               <span>48<span class="wicket">/3</span></span>
-              <small>Day 2 Powerplay</small>
+              <small>Day 2 • Powerplay Active</small>
             </div>
+
             <div class="broadcast-lower" id="homeBroadcastLower">
-              <strong>36 Players</strong>
-              <span>4 teams. 6 weeks. One champion.</span>
+              <strong>36 Members • 4 Teams</strong>
+              <span>2 matches every week. Full IPL-style scoring experience.</span>
             </div>
           </aside>
         </div>
@@ -81,7 +320,10 @@
           </div>
           <span class="powerplay-chip">Tap Score For Details</span>
         </div>
-        <div class="weekly-fixtures" id="homeWeeklyFixtures"></div>
+
+        <div class="weekly-fixtures" id="homeWeeklyFixtures">
+          <div class="loading-card">Loading live fixtures...</div>
+        </div>
       </section>
 
       <section class="section-shell reveal">
@@ -92,26 +334,30 @@
           </div>
           <span class="powerplay-chip">Tap Result For Details</span>
         </div>
-        <div class="weekly-fixtures" id="homeCompletedMatches"></div>
+
+        <div class="weekly-fixtures" id="homeCompletedMatches">
+          <div class="loading-card">Loading completed results...</div>
+        </div>
       </section>
 
       <section class="section-shell reveal" id="overview">
         <div class="section-heading">
           <p class="eyebrow">League Overview</p>
-          <h2>Auction drama, business runs, and a cricket finale.</h2>
+          <h2>Auction drama, business runs, wickets and a cricket finale.</h2>
         </div>
+
         <div class="overview-grid" id="overviewGrid">
           <article class="glass-stat">
             <span class="stat-number">36</span>
-            <strong>Players</strong>
+            <strong>Members</strong>
           </article>
           <article class="glass-stat">
             <span class="stat-number">4</span>
             <strong>Teams</strong>
           </article>
           <article class="glass-stat">
-            <span class="stat-number">Bid</span>
-            <strong>Auction System</strong>
+            <span class="stat-number">12</span>
+            <strong>Total Matches</strong>
           </article>
           <article class="glass-stat">
             <span class="stat-number">6</span>
@@ -128,7 +374,10 @@
           </div>
           <a class="text-link" href="dashboard.html#teams">Team Rooms</a>
         </div>
-        <div class="player-grid" id="auctionPlayers" aria-live="polite"></div>
+
+        <div class="player-grid" id="auctionPlayers" aria-live="polite">
+          <div class="loading-card">Loading player cards...</div>
+        </div>
       </section>
 
       <section class="section-shell reveal" id="format">
@@ -136,31 +385,36 @@
           <p class="eyebrow">Match Format</p>
           <h2>Six days, two innings, broadcast-style momentum.</h2>
         </div>
+
         <div class="timeline">
           <article class="timeline-card">
             <span class="day-pill">Weekly</span>
             <strong>2 Matches</strong>
-            <small>All 4 teams play each week across two fixtures.</small>
+            <small>All four teams play every week across two fixtures.</small>
           </article>
+
           <article class="timeline-card powerplay">
             <span class="day-pill">Day 1</span>
-            <strong>POWERPLAY - 2X RUNS</strong>
-            <small>Team A batting starts with boosted scoring.</small>
+            <strong>Batting Powerplay</strong>
+            <small>Team A starts batting with 2X runs.</small>
           </article>
+
           <article class="timeline-card">
-            <span class="day-pill">Day 2-3</span>
+            <span class="day-pill">Day 2–3</span>
             <strong>Team A Batting</strong>
-            <small>Runs build through referrals, visitors, and business.</small>
+            <small>Runs build through referrals, visitors and business.</small>
           </article>
+
           <article class="timeline-card powerplay">
             <span class="day-pill">Day 4</span>
-            <strong>POWERPLAY - 2X RUNS</strong>
-            <small>Team B opens its chase under the lights.</small>
+            <strong>Batting Powerplay</strong>
+            <small>Team B opens its chase with 2X runs.</small>
           </article>
+
           <article class="timeline-card">
-            <span class="day-pill">Day 5-6</span>
+            <span class="day-pill">Day 5–6</span>
             <strong>Team B Batting</strong>
-            <small>The final innings decides the winner.</small>
+            <small>The final innings decides the match winner.</small>
           </article>
         </div>
       </section>
@@ -170,8 +424,29 @@
           <p class="eyebrow">Scoring System</p>
           <h2>Every action hits the scoreboard.</h2>
         </div>
-        <div class="score-tile-grid" id="scoringRulesGrid"></div>
-        <div class="formula-ribbon" id="scoringFormula">Final Score = Runs - (Wickets x 2)</div>
+
+        <div class="score-tile-grid" id="scoringRulesGrid">
+          <article class="score-tile">
+            <span>1 Run</span>
+            <strong>Referral</strong>
+          </article>
+          <article class="score-tile">
+            <span>4 Runs</span>
+            <strong>Visitor</strong>
+          </article>
+          <article class="score-tile">
+            <span>6 Runs</span>
+            <strong>Closed Business</strong>
+          </article>
+          <article class="score-tile">
+            <span>Wicket</span>
+            <strong>No referral / absent</strong>
+          </article>
+        </div>
+
+        <div class="formula-ribbon" id="scoringFormula">
+          Final Score = Runs - (Wickets × 2)
+        </div>
       </section>
 
       <section class="section-shell reveal" id="awards">
@@ -179,25 +454,47 @@
           <p class="eyebrow">Awards</p>
           <h2>IPL-style caps for the league standouts.</h2>
         </div>
+
         <div class="award-grid">
           <article class="award-card orange">
             <span class="award-badge">Orange Cap</span>
             <strong>Top Runs</strong>
           </article>
+
+          <article class="award-card purple">
+            <span class="award-badge">Purple Cap</span>
+            <strong>Most Wickets</strong>
+          </article>
+
           <article class="award-card blue">
+            <span class="award-badge">Super Striker</span>
+            <strong>Highest Impact</strong>
+          </article>
+
+          <article class="award-card orange">
             <span class="award-badge">Power Player</span>
             <strong>Most Visitors</strong>
           </article>
+
           <article class="award-card purple">
             <span class="award-badge">Finisher</span>
             <strong>Closures</strong>
+          </article>
+
+          <article class="award-card blue">
+            <span class="award-badge">POTM</span>
+            <strong>Player of the Match</strong>
           </article>
         </div>
       </section>
     </main>
 
+    <div class="sticky-live-bar" id="stickyLiveBar">
+      🔴 LIVE • DPL 2.0 • Check today’s score on Live Dashboard ⚡
+    </div>
+
     <footer class="site-footer">
-      <span>Diorite Premier League</span>
+      <span>© 2026 Diorite Premier League 2.0</span>
       <a href="admin.html">Admin Panel</a>
     </footer>
 

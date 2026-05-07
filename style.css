@@ -1753,3 +1753,8 @@ textarea:focus {
     text-align: center;
   }
 }
+.scoreboard-shell {
+  position: static !important;
+  top: auto !important;
+  z-index: auto !important;
+}

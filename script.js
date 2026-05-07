@@ -1,4 +1,4 @@
-const STORAGE_KEY = "dpl-admin-data-v1";
+const STORAGE_KEY = "dpl-admin-data-v2";
 const ADMIN_AUTH_KEY = "dpl-admin-authenticated";
 const DEFAULT_ADMIN_PASSWORD = "DPL@2026";
 
@@ -12,51 +12,36 @@ const defaultData = {
     finale: "Cricket Match",
     totalPlayers: 36,
     totalTeams: 4,
-    auctionLabel: "Bid",
     leagueWeeks: 6,
     matchesPerWeek: 2,
   },
+
   security: {
     adminPassword: DEFAULT_ADMIN_PASSWORD,
   },
-  match: {
-    teamA: { name: "Titans", runs: 48, wickets: 3 },
-    teamB: { name: "Warriors", runs: 30, wickets: 2 },
-    day: 2,
-    powerplay: true,
-  },
-  auctionPlayers: [
-    { name: "Aarav Mehta", role: "Referrals", rating: 92 },
-    { name: "Nisha Rao", role: "Visitors", rating: 88 },
-    { name: "Kabir Shah", role: "Closures", rating: 95 },
-    { name: "Maya Iyer", role: "Referrals", rating: 84 },
-    { name: "Rohan Desai", role: "Visitors", rating: 80 },
-    { name: "Tara Kapoor", role: "Closures", rating: 90 },
-    { name: "Dev Malhotra", role: "Referrals", rating: 78 },
-    { name: "Ira Sen", role: "Visitors", rating: 86 },
-  ],
-  leaderboard: [
-    { team: "Titans", matches: 3, wins: 3, points: 6, nrr: "+1.82" },
-    { team: "Warriors", matches: 3, wins: 2, points: 4, nrr: "+0.64" },
-    { team: "Royals", matches: 3, wins: 1, points: 2, nrr: "-0.28" },
-    { team: "Blasters", matches: 3, wins: 0, points: 0, nrr: "-2.18" },
-  ],
+
   scoring: {
     powerplayMultiplier: 2,
     finalFormula: "Final Score = Runs - (Wickets × 2)",
-    rules: [
-      { label: "Referral", value: "1 Run", points: 1, type: "runs", accent: "green" },
-      { label: "Visitor", value: "4 Runs", points: 4, type: "runs", accent: "orange" },
-      { label: "Business", value: "6 Runs", points: 6, type: "runs", accent: "red" },
-      { label: "No referral / absent", value: "1 Wicket", points: 1, type: "wicket", accent: "purple" },
+    battingRules: [
+      { label: "Referral", value: "1 Run", points: 1, accent: "green" },
+      { label: "Visitor", value: "4 Runs", points: 4, accent: "orange" },
+      { label: "Closed Business", value: "6 Runs", points: 6, accent: "red" },
+    ],
+    bowlingRules: [
+      { label: "No referral", value: "1 Wicket", points: 1, accent: "purple" },
+      { label: "Absent", value: "1 Wicket", points: 1, accent: "purple" },
     ],
   },
+
   weeklyMatches: [
     {
       week: 1,
       matchNo: 1,
       teamA: "Titans",
       teamB: "Warriors",
+      battingTeam: "Titans",
+      bowlingTeam: "Warriors",
       teamARuns: 48,
       teamAWickets: 3,
       teamBRuns: 30,
@@ -65,10 +50,16 @@ const defaultData = {
       powerplay: true,
       status: "Live",
       performances: [
-        { name: "Aarav Mehta", team: "Titans", runs: 18, referrals: 2, visitors: 2, closures: 1, wickets: 0, note: "Opened the innings with a closure and two visitors." },
-        { name: "Maya Iyer", team: "Titans", runs: 14, referrals: 2, visitors: 3, closures: 0, wickets: 0, note: "Kept the Titans run rate moving." },
-        { name: "Nisha Rao", team: "Warriors", runs: 16, referrals: 1, visitors: 2, closures: 1, wickets: 0, note: "Best response from Warriors so far." },
-        { name: "Rohan Desai", team: "Warriors", runs: 8, referrals: 0, visitors: 2, closures: 0, wickets: 1, note: "Visitor points, but one wicket for no referral." },
+        {
+          name: "Aarav Mehta",
+          team: "Titans",
+          runs: 18,
+          referrals: 2,
+          visitors: 2,
+          closures: 1,
+          wickets: 0,
+          note: "Strong opening innings.",
+        },
       ],
     },
     {
@@ -76,6 +67,8 @@ const defaultData = {
       matchNo: 2,
       teamA: "Royals",
       teamB: "Blasters",
+      battingTeam: "Royals",
+      bowlingTeam: "Blasters",
       teamARuns: 22,
       teamAWickets: 1,
       teamBRuns: 18,
@@ -83,75 +76,67 @@ const defaultData = {
       day: 1,
       powerplay: true,
       status: "Live",
-      performances: [
-        { name: "Kabir Shah", team: "Royals", runs: 12, referrals: 2, visitors: 1, closures: 1, wickets: 0, note: "Fast start in the powerplay." },
-        { name: "Ira Sen", team: "Royals", runs: 10, referrals: 2, visitors: 2, closures: 0, wickets: 0, note: "Strong visitor contribution." },
-        { name: "Tara Kapoor", team: "Blasters", runs: 14, referrals: 1, visitors: 2, closures: 1, wickets: 0, note: "Blasters finisher keeping the chase alive." },
-        { name: "Dev Malhotra", team: "Blasters", runs: 4, referrals: 0, visitors: 1, closures: 0, wickets: 1, note: "One visitor, one wicket pressure point." },
-      ],
+      performances: [],
     },
   ],
-  completedMatches: [
-    {
-      week: 0,
-      matchNo: 1,
-      teamA: "Titans",
-      teamB: "Royals",
-      teamARuns: 64,
-      teamAWickets: 4,
-      teamBRuns: 52,
-      teamBWickets: 5,
-      day: 6,
-      powerplay: false,
-      status: "Completed",
-      result: "Titans won by 12 runs",
-      performances: [
-        { name: "Aarav Mehta", team: "Titans", runs: 24, referrals: 4, visitors: 2, closures: 2, wickets: 0, note: "Match-winning all-round business push." },
-        { name: "Kabir Shah", team: "Royals", runs: 22, referrals: 2, visitors: 2, closures: 2, wickets: 0, note: "Top scorer for Royals in the chase." },
-      ],
-    },
+
+  completedMatches: [],
+
+  leaderboard: [
+    { team: "Titans", matches: 1, wins: 1, points: 2, nrr: "+1.20" },
+    { team: "Warriors", matches: 1, wins: 0, points: 0, nrr: "-1.20" },
+    { team: "Royals", matches: 1, wins: 1, points: 2, nrr: "+0.80" },
+    { team: "Blasters", matches: 1, wins: 0, points: 0, nrr: "-0.80" },
   ],
+
   players: [
-    { name: "Kabir Shah", team: "Royals", runs: 72, visitors: 5, closures: 4, wickets: 6 },
-    { name: "Nisha Rao", team: "Warriors", runs: 58, visitors: 11, closures: 2, wickets: 4 },
-    { name: "Tara Kapoor", team: "Blasters", runs: 61, visitors: 7, closures: 5, wickets: 5 },
     { name: "Aarav Mehta", team: "Titans", runs: 66, visitors: 8, closures: 3, wickets: 3 },
-    { name: "Ira Sen", team: "Royals", runs: 44, visitors: 9, closures: 1, wickets: 2 },
+    { name: "Nisha Rao", team: "Warriors", runs: 58, visitors: 11, closures: 2, wickets: 4 },
+    { name: "Kabir Shah", team: "Royals", runs: 72, visitors: 5, closures: 4, wickets: 6 },
+    { name: "Tara Kapoor", team: "Blasters", runs: 61, visitors: 7, closures: 5, wickets: 5 },
   ],
+
+  auctionPlayers: [
+    { name: "Aarav Mehta", role: "Referrals", rating: 92 },
+    { name: "Nisha Rao", role: "Visitors", rating: 88 },
+    { name: "Kabir Shah", role: "Closures", rating: 95 },
+    { name: "Tara Kapoor", role: "Finisher", rating: 90 },
+  ],
+
   teams: [
     {
       name: "Titans",
       captain: "Aarav Mehta",
-      players: ["Aarav Mehta", "Maya Iyer", "Kabir Shah", "Ira Sen", "Vivaan Joshi", "Reva Nair", "Om Bhatia", "Sara Khan"],
+      players: ["Aarav Mehta", "Maya Iyer", "Vivaan Joshi"],
     },
     {
       name: "Warriors",
       captain: "Nisha Rao",
-      players: ["Nisha Rao", "Rohan Desai", "Tara Kapoor", "Dev Malhotra", "Anya Bose", "Neil Dutta", "Riya Jain", "Yash Sinha"],
+      players: ["Nisha Rao", "Rohan Desai", "Neil Dutta"],
     },
     {
       name: "Royals",
       captain: "Kabir Shah",
-      players: ["Kabir Shah", "Ira Sen", "Arjun Rao", "Mira Shah", "Kunal Jain", "Pia Menon", "Zoya Ali", "Rudra Patel"],
+      players: ["Kabir Shah", "Ira Sen", "Arjun Rao"],
     },
     {
       name: "Blasters",
       captain: "Tara Kapoor",
-      players: ["Tara Kapoor", "Dev Malhotra", "Nikhil Roy", "Meera Nair", "Vihaan Gupta", "Kiara Das", "Reyansh S", "Diya Lal"],
+      players: ["Tara Kapoor", "Dev Malhotra", "Nikhil Roy"],
     },
   ],
+
   commentary: [
-    { time: "12:42", text: "SIX! New visitor added by Team A." },
-    { time: "12:39", text: "WICKET! No referrals submitted in the last session." },
-    { time: "12:35", text: "POWERPLAY activated. Every run counts double." },
-    { time: "12:28", text: "FOUR! Visitor points push Warriors closer." },
+    { time: "12:42", text: "SIX! New visitor added." },
+    { time: "12:35", text: "POWERPLAY activated. Runs count double." },
+    { time: "12:28", text: "WICKET! No referral recorded." },
   ],
 };
 
 let dplData = loadLeagueData();
 let autosaveTimer;
 
-/* ---------------- UTILS ---------------- */
+/* ---------- UTILS ---------- */
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
@@ -197,176 +182,76 @@ function initials(name) {
     .toUpperCase();
 }
 
-/* ---------------- STORAGE ---------------- */
+/* ---------- STORAGE ---------- */
 
 function loadLeagueData() {
-  const fallback = clone(defaultData);
-
   try {
-    const savedData = localStorage.getItem(STORAGE_KEY);
-    if (!savedData) return fallback;
-
-    return normalizeData({ ...fallback, ...JSON.parse(savedData) });
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return clone(defaultData);
+    return normalizeData({ ...clone(defaultData), ...JSON.parse(saved) });
   } catch {
-    return fallback;
+    return clone(defaultData);
   }
 }
 
-function saveLeagueData(showMessage = true) {
-  sanitizeScores();
-
+function saveLeagueData(showToastMessage = true) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(dplData));
-    if (showMessage) showToast("DPL updates saved");
+    if (showToastMessage) showToast("Updates saved");
     return true;
   } catch {
-    if (showMessage) showToast("Could not save locally");
+    if (showToastMessage) showToast("Could not save locally");
     return false;
   }
 }
 
 function clearLeagueData() {
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-    return true;
-  } catch {
-    return false;
-  }
+  localStorage.removeItem(STORAGE_KEY);
 }
 
 function isAdminAuthed() {
-  try {
-    return sessionStorage.getItem(ADMIN_AUTH_KEY) === "true";
-  } catch {
-    return false;
-  }
+  return sessionStorage.getItem(ADMIN_AUTH_KEY) === "true";
 }
 
 function setAdminAuthed(value) {
-  try {
-    if (value) sessionStorage.setItem(ADMIN_AUTH_KEY, "true");
-    else sessionStorage.removeItem(ADMIN_AUTH_KEY);
-    return true;
-  } catch {
-    return false;
-  }
+  if (value) sessionStorage.setItem(ADMIN_AUTH_KEY, "true");
+  else sessionStorage.removeItem(ADMIN_AUTH_KEY);
 }
 
-function sanitizeScores() {
-  ["weeklyMatches", "completedMatches"].forEach((collection) => {
-    if (!Array.isArray(dplData[collection])) return;
-
-    dplData[collection] = dplData[collection].map((match) => ({
-      ...match,
-      teamARuns: safeScore(match.teamARuns),
-      teamAWickets: safeScore(match.teamAWickets),
-      teamBRuns: safeScore(match.teamBRuns),
-      teamBWickets: safeScore(match.teamBWickets),
-      day: clamp(match.day || 1, 1, 6),
-    }));
-  });
-}
-
-/* ---------------- NORMALIZE ---------------- */
+/* ---------- NORMALIZE ---------- */
 
 function normalizeData(data) {
-  const fallback = clone(defaultData);
-
-  return {
-    league: { ...fallback.league, ...(data.league || {}), matchesPerWeek: 2 },
-    security: { ...fallback.security, ...(data.security || {}) },
-    match: {
-      ...fallback.match,
-      ...(data.match || {}),
-      teamA: { ...fallback.match.teamA, ...((data.match && data.match.teamA) || {}) },
-      teamB: { ...fallback.match.teamB, ...((data.match && data.match.teamB) || {}) },
-    },
-    auctionPlayers: Array.isArray(data.auctionPlayers) ? data.auctionPlayers : fallback.auctionPlayers,
-    leaderboard: Array.isArray(data.leaderboard) ? data.leaderboard : fallback.leaderboard,
-    scoring: normalizeScoring(data.scoring, fallback.scoring),
-    weeklyMatches: normalizeTwoWeeklyMatches(data.weeklyMatches, fallback.weeklyMatches),
-    completedMatches: normalizeWeeklyMatches(data.completedMatches, fallback.completedMatches),
-    players: Array.isArray(data.players) ? data.players : fallback.players,
-    teams: Array.isArray(data.teams) ? data.teams : fallback.teams,
-    commentary: Array.isArray(data.commentary) ? data.commentary : fallback.commentary,
+  data.scoring = {
+    ...defaultData.scoring,
+    ...(data.scoring || {}),
+    battingRules: Array.isArray(data.scoring?.battingRules)
+      ? data.scoring.battingRules
+      : defaultData.scoring.battingRules,
+    bowlingRules: Array.isArray(data.scoring?.bowlingRules)
+      ? data.scoring.bowlingRules
+      : defaultData.scoring.bowlingRules,
   };
-}
 
-function normalizeScoring(scoring, fallbackScoring) {
-  const merged = { ...fallbackScoring, ...(scoring || {}) };
+  data.weeklyMatches = Array.isArray(data.weeklyMatches) ? data.weeklyMatches : [];
+  data.completedMatches = Array.isArray(data.completedMatches) ? data.completedMatches : [];
 
-  return {
-    powerplayMultiplier: numberValue(merged.powerplayMultiplier, 2),
-    finalFormula: merged.finalFormula || fallbackScoring.finalFormula,
-    rules: Array.isArray(merged.rules) ? merged.rules.map(normalizeScoringRule) : fallbackScoring.rules,
-  };
-}
-
-function normalizeScoringRule(rule = {}) {
-  return {
-    label: rule.label || "Scoring Criteria",
-    value: rule.value || "0 Runs",
-    points: safeScore(rule.points),
-    type: rule.type || "runs",
-    accent: rule.accent || "blue",
-  };
-}
-
-function normalizeWeeklyMatches(matches, fallbackMatches) {
-  const source = Array.isArray(matches) ? matches : fallbackMatches;
-
-  return source.map((fixture = {}, index) => {
-    const fallbackFixture = fallbackMatches[index] || fallbackMatches[0] || {};
-    const mergedFixture = { ...fallbackFixture, ...fixture };
-
-    return {
-      ...mergedFixture,
-      teamARuns: safeScore(mergedFixture.teamARuns),
-      teamAWickets: safeScore(mergedFixture.teamAWickets),
-      teamBRuns: safeScore(mergedFixture.teamBRuns),
-      teamBWickets: safeScore(mergedFixture.teamBWickets),
-      day: clamp(mergedFixture.day || 1, 1, 6),
-      performances: Array.isArray(mergedFixture.performances)
-        ? mergedFixture.performances.map(normalizePerformance)
-        : [],
-    };
-  });
-}
-
-function normalizeTwoWeeklyMatches(matches, fallbackMatches) {
-  const normalized = normalizeWeeklyMatches(matches, fallbackMatches);
-  const fallbackNormalized = normalizeWeeklyMatches(fallbackMatches, fallbackMatches);
-
-  while (normalized.length < 2) {
-    normalized.push(clone(fallbackNormalized[normalized.length] || fallbackNormalized[0]));
-  }
-
-  return normalized.slice(0, 2).map((fixture, index) => ({
-    ...fixture,
-    week: safeScore(fixture.week, 1),
-    matchNo: index + 1,
+  data.weeklyMatches = data.weeklyMatches.map((match, index) => ({
+    ...match,
+    matchNo: match.matchNo || index + 1,
+    battingTeam: match.battingTeam || match.teamA,
+    bowlingTeam: match.bowlingTeam || match.teamB,
     status: "Live",
+    performances: Array.isArray(match.performances) ? match.performances : [],
   }));
+
+  return data;
 }
 
-function normalizePerformance(player = {}) {
-  return {
-    name: player.name || "Member",
-    team: player.team || "",
-    runs: safeScore(player.runs),
-    referrals: safeScore(player.referrals),
-    visitors: safeScore(player.visitors),
-    closures: safeScore(player.closures),
-    wickets: safeScore(player.wickets),
-    note: player.note || "",
-  };
-}
+/* ---------- TOAST + UI HELPERS ---------- */
 
-/* ---------------- UI HELPERS ---------------- */
-
-function showToast(message = "Updated successfully") {
-  const oldToast = document.querySelector(".dpl-toast");
-  if (oldToast) oldToast.remove();
+function showToast(message) {
+  const existing = document.querySelector(".dpl-toast");
+  if (existing) existing.remove();
 
   const toast = document.createElement("div");
   toast.className = "dpl-toast";
@@ -378,66 +263,57 @@ function showToast(message = "Updated successfully") {
   setTimeout(() => {
     toast.classList.remove("show");
     setTimeout(() => toast.remove(), 300);
-  }, 2600);
+  }, 2400);
 }
 
 function injectUpgradeCss() {
-  if (document.querySelector("#dplUpgradeStyles")) return;
+  if (document.querySelector("#dpl-js-styles")) return;
 
   const style = document.createElement("style");
-  style.id = "dplUpgradeStyles";
+  style.id = "dpl-js-styles";
   style.textContent = `
     .dpl-toast {
       position: fixed;
       right: 18px;
       bottom: 18px;
       z-index: 99999;
-      background: linear-gradient(135deg, #ff6a00, #7b2ff7);
-      color: #fff;
       padding: 14px 18px;
       border-radius: 14px;
-      font-weight: 800;
-      box-shadow: 0 0 28px rgba(255,106,0,.35);
+      background: linear-gradient(135deg, #ff8a1f, #a855f7);
+      color: white;
+      font-weight: 900;
       opacity: 0;
       transform: translateY(18px);
       transition: .28s ease;
+      box-shadow: 0 0 28px rgba(255,138,31,.35);
     }
+
     .dpl-toast.show {
       opacity: 1;
       transform: translateY(0);
     }
+
+    .live-clock {
+      padding: .55rem .75rem;
+      border-radius: 999px;
+      background: rgba(35,213,255,.12);
+      border: 1px solid rgba(35,213,255,.34);
+      color: #23d5ff;
+      font-size: .76rem;
+      font-weight: 900;
+    }
+
     .match-detail-panel {
       animation: dplModalIn .32s ease;
       max-height: 90vh;
       overflow-y: auto;
     }
+
     @keyframes dplModalIn {
       from { opacity: 0; transform: translateY(28px) scale(.96); }
       to { opacity: 1; transform: translateY(0) scale(1); }
     }
-    .score-pop {
-      animation: dplScorePop .45s ease;
-    }
-    @keyframes dplScorePop {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.12); }
-      100% { transform: scale(1); }
-    }
-    .live-clock {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: rgba(0,198,255,.12);
-      border: 1px solid rgba(0,198,255,.28);
-      color: #00c6ff;
-      font-weight: 800;
-      font-size: 13px;
-    }
-    .backup-btn {
-      margin-left: 10px;
-    }
+
     @media (max-width: 768px) {
       .dpl-toast {
         left: 12px;
@@ -447,6 +323,7 @@ function injectUpgradeCss() {
       }
     }
   `;
+
   document.head.appendChild(style);
 }
 
@@ -457,7 +334,6 @@ function addLiveClock() {
   const clock = document.createElement("span");
   clock.id = "liveClock";
   clock.className = "live-clock";
-  clock.textContent = "LIVE TIME";
   target.appendChild(clock);
 
   setInterval(() => {
@@ -469,26 +345,11 @@ function addLiveClock() {
   }, 1000);
 }
 
-function autoScrollCommentary() {
-  const feed = document.querySelector(".commentary-feed");
-  if (!feed) return;
-  feed.scrollTop = feed.scrollHeight;
-}
-
-function animateScores() {
-  document
-    .querySelectorAll(".fixture-score-row span, .broadcast-score span, .detail-team-score strong")
-    .forEach((el) => {
-      el.classList.remove("score-pop");
-      void el.offsetWidth;
-      el.classList.add("score-pop");
-    });
-}
-
-/* ---------------- RENDER PUBLIC ---------------- */
+/* ---------- PUBLIC RENDER ---------- */
 
 function renderLeagueShell() {
-  const { league } = dplData;
+  const league = dplData.league;
+
   const title = document.querySelector("#leagueTitle");
   const subtitle = document.querySelector("#leagueSubtitle");
   const eyebrow = document.querySelector("#heroEyebrow");
@@ -498,7 +359,7 @@ function renderLeagueShell() {
   const homeLower = document.querySelector("#homeBroadcastLower");
 
   if (title) title.textContent = league.title;
-  if (subtitle) title && (subtitle.textContent = league.subtitle);
+  if (subtitle) subtitle.textContent = league.subtitle;
   if (eyebrow) eyebrow.textContent = league.eyebrow;
 
   if (fixtureStrip) {
@@ -511,33 +372,30 @@ function renderLeagueShell() {
 
   if (overviewGrid) {
     overviewGrid.innerHTML = `
-      <article class="glass-stat"><span class="stat-number">${escapeHtml(league.totalPlayers)}</span><strong>Members</strong></article>
-      <article class="glass-stat"><span class="stat-number">${escapeHtml(league.totalTeams)}</span><strong>Teams</strong></article>
+      <article class="glass-stat"><span class="stat-number">${league.totalPlayers}</span><strong>Members</strong></article>
+      <article class="glass-stat"><span class="stat-number">${league.totalTeams}</span><strong>Teams</strong></article>
       <article class="glass-stat"><span class="stat-number">12</span><strong>Total Matches</strong></article>
-      <article class="glass-stat"><span class="stat-number">${escapeHtml(league.leagueWeeks)}</span><strong>Weeks League</strong></article>
-      <article class="glass-stat"><span class="stat-number">${escapeHtml(league.matchesPerWeek)}</span><strong>Matches / Week</strong></article>
+      <article class="glass-stat"><span class="stat-number">${league.leagueWeeks}</span><strong>Weeks League</strong></article>
+      <article class="glass-stat"><span class="stat-number">${league.matchesPerWeek}</span><strong>Matches / Week</strong></article>
     `;
   }
 
   if (homeScore) {
-    const featuredFixture = dplData.weeklyMatches[0];
-    homeScore.dataset.matchIndex = "0";
-    homeScore.dataset.matchCollection = "weeklyMatches";
-    homeScore.setAttribute("role", "button");
-    homeScore.tabIndex = 0;
-
-    homeScore.innerHTML = featuredFixture
-      ? `
-        <span>${escapeHtml(featuredFixture.teamARuns)}<span class="wicket">/${escapeHtml(featuredFixture.teamAWickets)}</span></span>
-        <small>${escapeHtml(featuredFixture.teamA)} vs ${escapeHtml(featuredFixture.teamB)} - Day ${escapeHtml(featuredFixture.day)}${featuredFixture.powerplay ? " Powerplay" : ""}</small>
-      `
-      : `<span>0<span class="wicket">/0</span></span><small>No live match added</small>`;
+    const match = dplData.weeklyMatches[0];
+    if (match) {
+      homeScore.dataset.matchIndex = "0";
+      homeScore.dataset.matchCollection = "weeklyMatches";
+      homeScore.innerHTML = `
+        <span>${match.teamARuns}<span class="wicket">/${match.teamAWickets}</span></span>
+        <small>${escapeHtml(match.teamA)} vs ${escapeHtml(match.teamB)} • Day ${match.day}</small>
+      `;
+    }
   }
 
   if (homeLower) {
     homeLower.innerHTML = `
-      <strong>${escapeHtml(league.totalPlayers)} Members • ${escapeHtml(league.totalTeams)} Teams</strong>
-      <span>${escapeHtml(league.matchesPerWeek)} matches every week. ${escapeHtml(league.leagueWeeks)} weeks. One champion.</span>
+      <strong>${league.totalPlayers} Members • ${league.totalTeams} Teams</strong>
+      <span>${league.matchesPerWeek} matches every week. ${league.leagueWeeks} weeks. One champion.</span>
     `;
   }
 }
@@ -552,7 +410,7 @@ function renderAuctionPlayers() {
         <article class="player-card">
           <strong>${escapeHtml(player.name)}</strong>
           <span>Role: ${escapeHtml(player.role)}</span>
-          <div class="rating-track" aria-label="${escapeHtml(player.name)} rating ${escapeHtml(player.rating)}%">
+          <div class="rating-track">
             <i class="rating-bar" style="width:${clamp(player.rating, 0, 100)}%"></i>
           </div>
         </article>
@@ -565,96 +423,132 @@ function renderScoreboard() {
   const container = document.querySelector("#scoreboard");
   if (!container) return;
 
-  const visibleMatches = dplData.weeklyMatches.slice(0, 2);
-  const anyPowerplay = visibleMatches.some((fixture) => fixture.powerplay);
-
   container.innerHTML = `
     <div class="scoreboard-header">
       <span class="live-badge">LIVE</span>
-      <span class="powerplay-badge">${visibleMatches.length} MATCHES THIS WEEK</span>
-      ${anyPowerplay ? '<span class="powerplay-badge">POWERPLAY - 2X RUNS</span>' : ""}
+      <span class="powerplay-badge">${dplData.weeklyMatches.length} LIVE MATCHES</span>
     </div>
+
     <div class="scoreboard-fixtures weekly-fixtures">
-      ${visibleMatches.map((fixture, index) => renderFixtureCard(fixture, index, "weeklyMatches")).join("")}
+      ${dplData.weeklyMatches.map((match, index) => renderFixtureCard(match, index, "weeklyMatches")).join("")}
     </div>
   `;
 }
 
 function renderWeeklyFixtures() {
-  const containers = document.querySelectorAll("#weeklyFixtures, #homeWeeklyFixtures");
-  const fixtureCards = dplData.weeklyMatches.map((fixture, index) => renderFixtureCard(fixture, index, "weeklyMatches")).join("");
-
-  containers.forEach((container) => {
-    container.innerHTML = fixtureCards || `<p class="admin-note">No live fixtures added yet.</p>`;
+  document.querySelectorAll("#weeklyFixtures, #homeWeeklyFixtures").forEach((container) => {
+    container.innerHTML =
+      dplData.weeklyMatches.map((match, index) => renderFixtureCard(match, index, "weeklyMatches")).join("") ||
+      `<div class="loading-card">No live matches available.</div>`;
   });
 }
 
 function renderCompletedMatches() {
-  const containers = document.querySelectorAll("#completedMatches, #homeCompletedMatches");
-  const resultCards = dplData.completedMatches.map((fixture, index) => renderFixtureCard(fixture, index, "completedMatches")).join("");
-
-  containers.forEach((container) => {
-    container.innerHTML = resultCards || `<p class="admin-note">No completed results added yet.</p>`;
+  document.querySelectorAll("#completedMatches, #homeCompletedMatches").forEach((container) => {
+    container.innerHTML =
+      dplData.completedMatches.map((match, index) => renderFixtureCard(match, index, "completedMatches")).join("") ||
+      `<div class="loading-card">No previous matches yet.</div>`;
   });
 }
 
-function renderFixtureCard(fixture, index, collection = "weeklyMatches") {
-  const lead = safeScore(fixture.teamARuns) - safeScore(fixture.teamBRuns);
-  const leader = lead === 0 ? "Level" : `${lead > 0 ? fixture.teamA : fixture.teamB} +${Math.abs(lead)}`;
-  const status = String(fixture.status || "").toLowerCase();
-  const result = fixture.result || (status === "completed" ? getMatchResult(fixture) : leader);
+function renderFixtureCard(match, index, collection) {
+  const result = collection === "completedMatches" ? match.result || getMatchResult(match) : getLiveStatus(match);
 
   return `
-    <button class="fixture-card ${status === "live" ? "is-live" : ""} ${status === "completed" ? "is-completed" : ""}" type="button" data-match-index="${index}" data-match-collection="${escapeHtml(collection)}">
+    <button class="fixture-card ${collection === "weeklyMatches" ? "is-live" : "is-completed"}"
+      type="button"
+      data-match-index="${index}"
+      data-match-collection="${collection}">
+      
       <div class="fixture-card-top">
-        <span class="fixture-tag">Week ${escapeHtml(fixture.week)} / Match ${escapeHtml(fixture.matchNo)}</span>
-        <span class="fixture-status">${escapeHtml(fixture.status)}</span>
+        <span class="fixture-tag">Week ${match.week} / Match ${match.matchNo}</span>
+        <span class="fixture-status">${escapeHtml(match.status)}</span>
       </div>
+
       <div class="fixture-score-row">
         <div>
-          <strong>${escapeHtml(fixture.teamA)}</strong>
-          <span>${escapeHtml(fixture.teamARuns)}/${escapeHtml(fixture.teamAWickets)}</span>
+          <strong>${escapeHtml(match.teamA)}</strong>
+          <span>${match.teamARuns}/${match.teamAWickets}</span>
         </div>
         <em>vs</em>
         <div>
-          <strong>${escapeHtml(fixture.teamB)}</strong>
-          <span>${escapeHtml(fixture.teamBRuns)}/${escapeHtml(fixture.teamBWickets)}</span>
+          <strong>${escapeHtml(match.teamB)}</strong>
+          <span>${match.teamBRuns}/${match.teamBWickets}</span>
         </div>
       </div>
+
       <div class="score-meta">
-        <span>Day ${escapeHtml(fixture.day)}</span>
+        <span>Day ${match.day}</span>
+        <span>Batting: ${escapeHtml(match.battingTeam || match.teamA)}</span>
+        <span>Bowling: ${escapeHtml(match.bowlingTeam || match.teamB)}</span>
+        ${match.powerplay ? "<span>Powerplay</span>" : ""}
         <span>${escapeHtml(result)}</span>
-        ${fixture.powerplay ? "<span>Powerplay</span>" : ""}
-        <span>Tap for details</span>
       </div>
     </button>
   `;
 }
 
-function getMatchResult(fixture) {
-  const lead = safeScore(fixture.teamARuns) - safeScore(fixture.teamBRuns);
+function getLiveStatus(match) {
+  const lead = safeScore(match.teamARuns) - safeScore(match.teamBRuns);
+  if (lead === 0) return "Scores level";
+  return `${lead > 0 ? match.teamA : match.teamB} +${Math.abs(lead)} runs`;
+}
+
+function getMatchResult(match) {
+  const lead = safeScore(match.teamARuns) - safeScore(match.teamBRuns);
   if (lead === 0) return "Match tied";
-  return `${lead > 0 ? fixture.teamA : fixture.teamB} won by ${Math.abs(lead)} runs`;
+  return `${lead > 0 ? match.teamA : match.teamB} won by ${Math.abs(lead)} runs`;
+}
+
+function renderScoringRules() {
+  const grid = document.querySelector("#scoringRulesGrid");
+  const formula = document.querySelector("#scoringFormula");
+
+  if (grid) {
+    grid.innerHTML = `
+      <article class="score-tile accent-blue"><span>Batting</span><strong>Run Scoring</strong></article>
+      ${dplData.scoring.battingRules
+        .map(
+          (rule) => `
+            <article class="score-tile accent-${escapeHtml(rule.accent)}">
+              <span>${escapeHtml(rule.value)}</span>
+              <strong>${escapeHtml(rule.label)}</strong>
+            </article>
+          `
+        )
+        .join("")}
+
+      <article class="score-tile accent-purple"><span>Bowling</span><strong>Wickets / Pressure</strong></article>
+      ${dplData.scoring.bowlingRules
+        .map(
+          (rule) => `
+            <article class="score-tile accent-${escapeHtml(rule.accent)}">
+              <span>${escapeHtml(rule.value)}</span>
+              <strong>${escapeHtml(rule.label)}</strong>
+            </article>
+          `
+        )
+        .join("")}
+    `;
+  }
+
+  if (formula) {
+    formula.textContent = `${dplData.scoring.finalFormula} | Powerplay = ${dplData.scoring.powerplayMultiplier}X Runs`;
+  }
 }
 
 function renderLeaderboard() {
   const body = document.querySelector("#leaderboardBody");
   if (!body) return;
 
-  const rankedRows = [...dplData.leaderboard].sort((a, b) => {
-    const pointsGap = safeScore(b.points) - safeScore(a.points);
-    if (pointsGap) return pointsGap;
-    return numberValue(parseFloat(b.nrr)) - numberValue(parseFloat(a.nrr));
-  });
-
-  body.innerHTML = rankedRows
+  body.innerHTML = dplData.leaderboard
     .map(
       (row, index) => `
-        <tr class="${index === 0 ? "top-team" : index === rankedRows.length - 1 ? "bottom-team" : ""}">
+        <tr class="${index === 0 ? "top-team" : ""}">
           <td><span class="rank-dot"></span><strong>${escapeHtml(row.team)}</strong></td>
-          <td>${escapeHtml(row.matches)}</td>
-          <td>${escapeHtml(row.wins)}</td>
-          <td>${escapeHtml(row.points)}</td>
+          <td>${row.matches}</td>
+          <td>${row.wins}</td>
+          <td>${row.points}</td>
           <td>${escapeHtml(row.nrr)}</td>
         </tr>
       `
@@ -662,57 +556,27 @@ function renderLeaderboard() {
     .join("");
 }
 
-function renderScoringRules() {
-  const rulesGrid = document.querySelector("#scoringRulesGrid");
-  const formula = document.querySelector("#scoringFormula");
-
-  if (rulesGrid) {
-    rulesGrid.innerHTML = dplData.scoring.rules
-      .map(
-        (rule) => `
-          <article class="score-tile accent-${escapeHtml(rule.accent)}">
-            <span>${escapeHtml(rule.value)}</span>
-            <strong>${escapeHtml(rule.label)}</strong>
-          </article>
-        `
-      )
-      .join("");
-  }
-
-  if (formula) {
-    formula.textContent = `${dplData.scoring.finalFormula} | Powerplay = ${dplData.scoring.powerplayMultiplier}X runs`;
-  }
-}
-
-function getTopPlayer(metric) {
-  return [...dplData.players].sort((a, b) => safeScore(b[metric]) - safeScore(a[metric]))[0] || {
-    name: "No player",
-    team: "",
-    [metric]: 0,
-  };
-}
-
 function renderCaps() {
   const container = document.querySelector("#capsStack");
   if (!container) return;
 
   const awards = [
-    { title: "Orange Cap", metric: "runs", label: "runs" },
-    { title: "Purple Cap", metric: "wickets", label: "wickets" },
-    { title: "Power Player", metric: "visitors", label: "visitors" },
-    { title: "Best Finisher", metric: "closures", label: "closures" },
+    ["Orange Cap", "runs", "runs"],
+    ["Purple Cap", "wickets", "wickets"],
+    ["Power Player", "visitors", "visitors"],
+    ["Best Finisher", "closures", "closures"],
   ];
 
   container.innerHTML = awards
-    .map((award) => {
-      const player = getTopPlayer(award.metric);
+    .map(([title, metric, label]) => {
+      const player = [...dplData.players].sort((a, b) => safeScore(b[metric]) - safeScore(a[metric]))[0];
       return `
         <article class="cap-card">
-          <div class="avatar">${escapeHtml(initials(player.name))}</div>
+          <div class="avatar">${escapeHtml(initials(player?.name || "NA"))}</div>
           <div>
-            <span>${escapeHtml(award.title)}</span>
-            <strong>${escapeHtml(player.name)}</strong>
-            <div class="metric">${escapeHtml(player[award.metric] || 0)} ${escapeHtml(award.label)}</div>
+            <span>${title}</span>
+            <strong>${escapeHtml(player?.name || "No Player")}</strong>
+            <div class="metric">${safeScore(player?.[metric])} ${label}</div>
           </div>
         </article>
       `;
@@ -730,9 +594,7 @@ function renderTeams() {
         <article class="team-card">
           <strong>${escapeHtml(team.name)}</strong>
           <span>Captain: ${escapeHtml(team.captain)}</span>
-          <ul>
-            ${(team.players || []).map((player) => `<li>${escapeHtml(player)}</li>`).join("")}
-          </ul>
+          <ul>${team.players.map((player) => `<li>${escapeHtml(player)}</li>`).join("")}</ul>
         </article>
       `
     )
@@ -743,11 +605,9 @@ function renderCommentary() {
   const container = document.querySelector("#commentaryFeed");
   if (!container) return;
 
-  const loopedFeed = [...dplData.commentary, ...dplData.commentary];
-
   container.innerHTML = `
     <div class="commentary-list">
-      ${loopedFeed
+      ${dplData.commentary
         .map(
           (item) => `
             <div class="commentary-item">
@@ -761,238 +621,72 @@ function renderCommentary() {
   `;
 }
 
-/* ---------------- MODAL ---------------- */
+/* ---------- MODAL ---------- */
 
-function openMatchDetails(index, collection = "weeklyMatches") {
-  const matchCollection = Array.isArray(dplData[collection]) ? dplData[collection] : dplData.weeklyMatches;
-  const fixture = matchCollection[index];
-  if (!fixture) return;
+function openMatchDetails(index, collection) {
+  const match = dplData[collection]?.[index];
+  if (!match) return;
 
-  const modal = ensureMatchModal();
-  modal.innerHTML = renderMatchDetails(fixture);
-  modal.hidden = false;
-  document.body.classList.add("modal-open");
-
-  const closeButton = modal.querySelector("[data-close-modal]");
-  if (closeButton) closeButton.focus();
-}
-
-function ensureMatchModal() {
   let modal = document.querySelector("#matchDetailModal");
-  if (modal) return modal;
 
-  modal = document.createElement("div");
-  modal.id = "matchDetailModal";
-  modal.className = "match-modal";
-  modal.hidden = true;
-  document.body.appendChild(modal);
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "matchDetailModal";
+    modal.className = "match-modal";
+    document.body.appendChild(modal);
+  }
 
-  return modal;
-}
-
-function renderMatchDetails(fixture) {
-  const performances = Array.isArray(fixture.performances) ? fixture.performances : [];
-  const topPerformer = [...performances].sort((a, b) => safeScore(b.runs) - safeScore(a.runs))[0];
-  const lead = safeScore(fixture.teamARuns) - safeScore(fixture.teamBRuns);
-
-  const status =
-    String(fixture.status).toLowerCase() === "completed"
-      ? fixture.result || getMatchResult(fixture)
-      : lead === 0
-      ? "Scores level"
-      : `${lead > 0 ? fixture.teamA : fixture.teamB} leading by ${Math.abs(lead)} runs`;
-
-  return `
+  modal.innerHTML = `
     <div class="match-modal-backdrop" data-close-modal></div>
-    <section class="match-detail-panel" role="dialog" aria-modal="true">
+    <section class="match-detail-panel">
       <div class="match-detail-header">
         <div>
-          <p class="eyebrow">Match Detail</p>
-          <h2>${escapeHtml(fixture.teamA)} vs ${escapeHtml(fixture.teamB)}</h2>
+          <p class="eyebrow">Match Details</p>
+          <h2>${escapeHtml(match.teamA)} vs ${escapeHtml(match.teamB)}</h2>
         </div>
-        <button class="icon-btn" type="button" data-close-modal>Close</button>
+        <button class="icon-btn" data-close-modal>Close</button>
       </div>
 
       <div class="match-detail-score">
-        ${renderDetailTeamScore(fixture.teamA, fixture.teamARuns, fixture.teamAWickets)}
+        ${renderDetailTeamScore(match.teamA, match.teamARuns, match.teamAWickets)}
         <div class="match-detail-center">
-          <span class="fixture-tag">Week ${escapeHtml(fixture.week)} / Match ${escapeHtml(fixture.matchNo)}</span>
-          <strong>${escapeHtml(status)}</strong>
-          <small>Day ${escapeHtml(fixture.day)}${fixture.powerplay ? " - Powerplay active" : ""}</small>
+          <span class="fixture-tag">Week ${match.week} / Match ${match.matchNo}</span>
+          <strong>${escapeHtml(collection === "completedMatches" ? match.result : getLiveStatus(match))}</strong>
+          <small>Batting: ${escapeHtml(match.battingTeam || match.teamA)} | Bowling: ${escapeHtml(match.bowlingTeam || match.teamB)}</small>
         </div>
-        ${renderDetailTeamScore(fixture.teamB, fixture.teamBRuns, fixture.teamBWickets)}
-      </div>
-
-      <div class="performance-summary">
-        <article><span>Total Runs</span><strong>${escapeHtml(safeScore(fixture.teamARuns) + safeScore(fixture.teamBRuns))}</strong></article>
-        <article><span>Total Wickets</span><strong>${escapeHtml(safeScore(fixture.teamAWickets) + safeScore(fixture.teamBWickets))}</strong></article>
-        <article><span>Top Performer</span><strong>${escapeHtml(topPerformer ? topPerformer.name : "Not added")}</strong></article>
-      </div>
-
-      <div class="performance-table-wrap">
-        <table class="performance-table">
-          <thead>
-            <tr>
-              <th>Member</th>
-              <th>Team</th>
-              <th>Runs</th>
-              <th>Ref</th>
-              <th>Visitors</th>
-              <th>Closures</th>
-              <th>Wkts</th>
-              <th>Impact</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${performances.map(renderPerformanceRow).join("") || '<tr><td colspan="8">No performance details added yet.</td></tr>'}
-          </tbody>
-        </table>
+        ${renderDetailTeamScore(match.teamB, match.teamBRuns, match.teamBWickets)}
       </div>
     </section>
   `;
+
+  modal.hidden = false;
+  document.body.classList.add("modal-open");
 }
 
 function renderDetailTeamScore(team, runs, wickets) {
   return `
     <article class="detail-team-score">
       <span>${escapeHtml(team)}</span>
-      <strong>${escapeHtml(runs)}<small>/${escapeHtml(wickets)}</small></strong>
+      <strong>${safeScore(runs)}<small>/${safeScore(wickets)}</small></strong>
     </article>
-  `;
-}
-
-function renderPerformanceRow(player) {
-  return `
-    <tr>
-      <td><strong>${escapeHtml(player.name)}</strong></td>
-      <td>${escapeHtml(player.team)}</td>
-      <td>${escapeHtml(player.runs)}</td>
-      <td>${escapeHtml(player.referrals)}</td>
-      <td>${escapeHtml(player.visitors)}</td>
-      <td>${escapeHtml(player.closures)}</td>
-      <td>${escapeHtml(player.wickets)}</td>
-      <td>${escapeHtml(player.note)}</td>
-    </tr>
   `;
 }
 
 function closeMatchDetails() {
   const modal = document.querySelector("#matchDetailModal");
   if (!modal) return;
-
   modal.hidden = true;
   modal.innerHTML = "";
   document.body.classList.remove("modal-open");
 }
 
-/* ---------------- ADMIN ---------------- */
+/* ---------- ADMIN ---------- */
 
-function renderAdminPanel(message = "") {
-  const form = document.querySelector("#adminForm");
-  if (!form) return;
-
-  if (!isAdminAuthed()) {
-    renderAdminLogin(message);
-    return;
-  }
-
-  form.innerHTML = `
-    <div class="admin-toolbar">
-      <div>
-        <p class="eyebrow">Editable Data</p>
-        <h2>League Control Panel</h2>
-      </div>
-      <div class="admin-toolbar-actions">
-        <div class="admin-status" id="adminStatus">${escapeHtml(message)}</div>
-        <button class="mini-btn" type="button" id="exportBackupBtn">Export Backup</button>
-        <button class="mini-btn" type="button" id="logoutAdmin">Logout</button>
-      </div>
-    </div>
-
-    <section class="admin-panel-card">
-      <div class="admin-section-title"><span>01</span><h3>League Identity</h3></div>
-      <div class="admin-grid">
-        ${field("Title", "leagueTitleInput", dplData.league.title)}
-        ${field("Subtitle", "leagueSubtitleInput", dplData.league.subtitle)}
-        ${field("Eyebrow", "leagueEyebrowInput", dplData.league.eyebrow)}
-        ${field("Auction Date", "leagueAuctionInput", dplData.league.auctionDate)}
-        ${field("League Start", "leagueStartInput", dplData.league.startDate)}
-        ${field("Finale", "leagueFinaleInput", dplData.league.finale)}
-      </div>
-    </section>
-
-    <section class="admin-panel-card">
-      <div class="admin-section-title"><span>02</span><h3>Weekly Live Fixtures</h3></div>
-      <div class="admin-rows" id="weeklyMatchesEditor">
-        ${dplData.weeklyMatches.map(renderWeeklyMatchEditorRow).join("")}
-      </div>
-    </section>
-
-    <section class="admin-panel-card">
-      <div class="admin-section-title"><span>03</span><h3>Leaderboard</h3></div>
-      <div class="admin-rows" id="leaderboardEditor">
-        ${dplData.leaderboard.map(renderLeaderboardEditorRow).join("")}
-      </div>
-    </section>
-
-    <section class="admin-panel-card">
-      <div class="admin-section-title"><span>04</span><h3>Caps Players</h3></div>
-      <div class="admin-rows" id="playersEditor">
-        ${dplData.players.map(renderPlayerEditorRow).join("")}
-      </div>
-    </section>
-
-    <section class="admin-panel-card">
-      <div class="admin-section-title"><span>05</span><h3>Teams</h3></div>
-      <div class="admin-rows" id="teamsEditor">
-        ${dplData.teams.map(renderTeamEditorRow).join("")}
-      </div>
-    </section>
-
-    <section class="admin-panel-card">
-      <div class="admin-section-title"><span>06</span><h3>Commentary Feed</h3></div>
-      <div class="admin-rows" id="commentaryEditor">
-        ${dplData.commentary.map(renderCommentaryEditorRow).join("")}
-      </div>
-    </section>
-
-    <div class="admin-actions">
-      <button class="btn btn-live" type="submit">Save Updates</button>
-      <button class="btn btn-outline" type="button" id="resetData">Reset Demo Data</button>
-    </div>
-  `;
-
-  form.onsubmit = handleAdminSubmit;
-  form.onclick = handleAdminClick;
-}
-
-function renderAdminLogin(message = "") {
-  const form = document.querySelector("#adminForm");
-  if (!form) return;
-
-  form.innerHTML = `
-    <section class="admin-login-card">
-      <div class="admin-section-title"><span>PW</span><h3>Password Required</h3></div>
-      <p class="admin-note">Enter the admin password to edit DPL scores and updates.</p>
-      <label class="field">
-        <span>Password</span>
-        <input id="adminLoginPassword" type="password" placeholder="Enter admin password" />
-      </label>
-      <div class="admin-status ${message ? "" : "is-hidden"}">${escapeHtml(message)}</div>
-      <div class="admin-actions static-actions">
-        <button class="btn btn-live" type="submit">Unlock Admin Panel</button>
-      </div>
-    </section>
-  `;
-
-  form.onsubmit = handleAdminLogin;
-}
-
-function field(label, id, value, type = "text", attributes = "") {
+function field(label, id, value, type = "text") {
   return `
     <label class="field">
       <span>${escapeHtml(label)}</span>
-      <input id="${escapeHtml(id)}" type="${escapeHtml(type)}" value="${escapeHtml(value)}" ${attributes} />
+      <input id="${escapeHtml(id)}" type="${type}" value="${escapeHtml(value)}" />
     </label>
   `;
 }
@@ -1001,463 +695,12 @@ function textarea(label, id, value) {
   return `
     <label class="field">
       <span>${escapeHtml(label)}</span>
-      <textarea id="${escapeHtml(id)}" rows="5">${escapeHtml(value)}</textarea>
+      <textarea id="${escapeHtml(id)}" rows="4">${escapeHtml(value)}</textarea>
     </label>
   `;
 }
 
-function renderWeeklyMatchEditorRow(fixture, index) {
-  return `
-    <div class="admin-row admin-row-fixture">
-      ${field("Week", `weekly-${index}-week`, fixture.week, "number")}
-      ${field("Team A", `weekly-${index}-teamA`, fixture.teamA)}
-      ${field("A Runs", `weekly-${index}-teamARuns`, fixture.teamARuns, "number")}
-      ${field("A Wickets", `weekly-${index}-teamAWickets`, fixture.teamAWickets, "number")}
-      ${field("Team B", `weekly-${index}-teamB`, fixture.teamB)}
-      ${field("B Runs", `weekly-${index}-teamBRuns`, fixture.teamBRuns, "number")}
-      ${field("B Wickets", `weekly-${index}-teamBWickets`, fixture.teamBWickets, "number")}
-      ${field("Day", `weekly-${index}-day`, fixture.day, "number")}
-      <label class="field checkbox-field">
-        <input type="checkbox" id="weekly-${index}-powerplay" ${fixture.powerplay ? "checked" : ""} />
-        <span>Powerplay</span>
-      </label>
-    </div>
-  `;
-}
-
-function renderLeaderboardEditorRow(row, index) {
-  return `
-    <div class="admin-row">
-      ${field("Team", `leaderboard-${index}-team`, row.team)}
-      ${field("M", `leaderboard-${index}-matches`, row.matches, "number")}
-      ${field("W", `leaderboard-${index}-wins`, row.wins, "number")}
-      ${field("PTS", `leaderboard-${index}-points`, row.points, "number")}
-      ${field("NRR", `leaderboard-${index}-nrr`, row.nrr)}
-    </div>
-  `;
-}
-
-function renderPlayerEditorRow(player, index) {
-  return `
-    <div class="admin-row">
-      ${field("Name", `player-${index}-name`, player.name)}
-      ${field("Team", `player-${index}-team`, player.team || "")}
-      ${field("Runs", `player-${index}-runs`, player.runs, "number")}
-      ${field("Visitors", `player-${index}-visitors`, player.visitors, "number")}
-      ${field("Closures", `player-${index}-closures`, player.closures, "number")}
-      ${field("Wickets", `player-${index}-wickets`, player.wickets || 0, "number")}
-    </div>
-  `;
-}
-
-function renderTeamEditorRow(team, index) {
-  return `
-    <div class="admin-row admin-row-wide">
-      ${field("Team Name", `team-${index}-name`, team.name)}
-      ${field("Captain", `team-${index}-captain`, team.captain)}
-      ${textarea("Players, one per line", `team-${index}-players`, (team.players || []).join("\n"))}
-    </div>
-  `;
-}
-
-function renderCommentaryEditorRow(item, index) {
-  return `
-    <div class="admin-row">
-      ${field("Time", `commentary-${index}-time`, item.time)}
-      ${field("Commentary", `commentary-${index}-text`, item.text)}
-    </div>
-  `;
-}
-
-function handleAdminLogin(event) {
-  event.preventDefault();
-
-  const password = getValue("adminLoginPassword", "");
-
-  if (password === dplData.security.adminPassword) {
-    setAdminAuthed(true);
-    renderAdminPanel("Admin unlocked.");
-    showToast("Admin unlocked");
-    return;
-  }
-
-  renderAdminLogin("Incorrect password.");
-}
-
-function handleAdminSubmit(event) {
-  event.preventDefault();
-  dplData = collectAdminFormData();
-  saveLeagueData();
-  renderAll();
-  renderAdminPanel("Saved. Public pages now use updated data.");
-}
-
-function handleAdminClick(event) {
-  if (event.target.closest("#logoutAdmin")) {
-    setAdminAuthed(false);
-    renderAdminPanel("Logged out.");
-    return;
-  }
-
-  if (event.target.closest("#resetData")) {
-    dplData = clone(defaultData);
-    clearLeagueData();
-    setAdminAuthed(false);
-    renderAll();
-    renderAdminPanel("Demo data restored.");
-    showToast("Demo data restored");
-    return;
-  }
-
-  if (event.target.closest("#exportBackupBtn")) {
-    exportLeagueData();
-  }
-}
-
-function collectAdminFormData() {
-  return {
-    ...dplData,
-    league: {
-      ...dplData.league,
-      title: getValue("leagueTitleInput", dplData.league.title),
-      subtitle: getValue("leagueSubtitleInput", dplData.league.subtitle),
-      eyebrow: getValue("leagueEyebrowInput", dplData.league.eyebrow),
-      auctionDate: getValue("leagueAuctionInput", dplData.league.auctionDate),
-      startDate: getValue("leagueStartInput", dplData.league.startDate),
-      finale: getValue("leagueFinaleInput", dplData.league.finale),
-    },
-    weeklyMatches: dplData.weeklyMatches.map((fixture, index) => ({
-      ...fixture,
-      week: getNumber(`weekly-${index}-week`, fixture.week),
-      teamA: getValue(`weekly-${index}-teamA`, fixture.teamA),
-      teamARuns: getNumber(`weekly-${index}-teamARuns`, fixture.teamARuns),
-      teamAWickets: getNumber(`weekly-${index}-teamAWickets`, fixture.teamAWickets),
-      teamB: getValue(`weekly-${index}-teamB`, fixture.teamB),
-      teamBRuns: getNumber(`weekly-${index}-teamBRuns`, fixture.teamBRuns),
-      teamBWickets: getNumber(`weekly-${index}-teamBWickets`, fixture.teamBWickets),
-      day: clamp(getNumber(`weekly-${index}-day`, fixture.day), 1, 6),
-      powerplay: Boolean(document.getElementById(`weekly-${index}-powerplay`)?.checked),
-    })),
-    leaderboard: dplData.leaderboard.map((row, index) => ({
-      team: getValue(`leaderboard-${index}-team`, row.team),
-      matches: getNumber(`leaderboard-${index}-matches`, row.matches),
-      wins: getNumber(`leaderboard-${index}-wins`, row.wins),
-      points: getNumber(`leaderboard-${index}-points`, row.points),
-      nrr: getValue(`leaderboard-${index}-nrr`, row.nrr),
-    })),
-    players: dplData.players.map((player, index) => ({
-      name: getValue(`player-${index}-name`, player.name),
-      team: getValue(`player-${index}-team`, player.team || ""),
-      runs: getNumber(`player-${index}-runs`, player.runs),
-      visitors: getNumber(`player-${index}-visitors`, player.visitors),
-      closures: getNumber(`player-${index}-closures`, player.closures),
-      wickets: getNumber(`player-${index}-wickets`, player.wickets || 0),
-    })),
-    teams: dplData.teams.map((team, index) => ({
-      name: getValue(`team-${index}-name`, team.name),
-      captain: getValue(`team-${index}-captain`, team.captain),
-      players: getValue(`team-${index}-players`, (team.players || []).join("\n"))
-        .split("\n")
-        .map((p) => p.trim())
-        .filter(Boolean),
-    })),
-    commentary: dplData.commentary.map((item, index) => ({
-      time: getValue(`commentary-${index}-time`, item.time),
-      text: getValue(`commentary-${index}-text`, item.text),
-    })),
-  };
-}
-
-/* ---------------- BACKUP ---------------- */
-
-function exportLeagueData() {
-  const blob = new Blob([JSON.stringify(dplData, null, 2)], {
-    type: "application/json",
-  });
-
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "dpl-2-backup.json";
-  link.click();
-
-  URL.revokeObjectURL(link.href);
-  showToast("Backup downloaded");
-}
-
-/* ---------------- AUTOSAVE ---------------- */
-
-function triggerAutosave() {
-  const adminForm = document.querySelector("#adminForm");
-  if (!adminForm || !isAdminAuthed()) return;
-
-  clearTimeout(autosaveTimer);
-
-  autosaveTimer = setTimeout(() => {
-    try {
-      dplData = collectAdminFormData();
-      saveLeagueData(false);
-      renderAll();
-
-      const status = document.querySelector("#adminStatus");
-      if (status) status.textContent = "Autosaved";
-    } catch {
-      // Silent fail to avoid disturbing admin updates
-    }
-  }, 1200);
-}
-
-/* ---------------- BOOT ---------------- */
-
-function renderAll() {
-  renderLeagueShell();
-  renderAuctionPlayers();
-  renderScoreboard();
-  renderLeaderboard();
-  renderScoringRules();
-  renderWeeklyFixtures();
-  renderCompletedMatches();
-  renderCaps();
-  renderTeams();
-  renderCommentary();
-
-  addLiveClock();
-  autoScrollCommentary();
-  animateScores();
-}
-
-document.addEventListener("click", (event) => {
-  const fixtureCard = event.target.closest("[data-match-index]");
-  if (fixtureCard) {
-    openMatchDetails(Number(fixtureCard.dataset.matchIndex), fixtureCard.dataset.matchCollection || "weeklyMatches");
-    return;
-  }
-
-  if (event.target.closest("[data-close-modal]")) {
-    closeMatchDetails();
-  }
-});
-
-document.addEventListener("keydown", (event) => {
-  const fixtureCard = event.target.closest && event.target.closest("[data-match-index]");
-
-  if (fixtureCard && (event.key === "Enter" || event.key === " ")) {
-    event.preventDefault();
-    openMatchDetails(Number(fixtureCard.dataset.matchIndex), fixtureCard.dataset.matchCollection || "weeklyMatches");
-  }
-
-  if (event.key === "Escape") closeMatchDetails();
-});
-
-document.addEventListener("input", (event) => {
-  if (event.target.closest("#adminForm")) triggerAutosave();
-});
-
-document.addEventListener("change", (event) => {
-  if (event.target.closest("#adminForm")) triggerAutosave();
-});
-
-injectUpgradeCss();
-renderAll();
-renderAdminPanel();
-
-/* =================================================
-   DPL 2.0 ADMIN UPGRADE PACK
-   Paste at END of script.js
-================================================= */
-
-function ensureCriteriaStructure() {
-  if (!dplData.scoring.battingRules) {
-    dplData.scoring.battingRules = [
-      { label: "Referral", value: "1 Run", points: 1, accent: "green" },
-      { label: "Visitor", value: "4 Runs", points: 4, accent: "orange" },
-      { label: "Closed Business", value: "6 Runs", points: 6, accent: "red" },
-    ];
-  }
-
-  if (!dplData.scoring.bowlingRules) {
-    dplData.scoring.bowlingRules = [
-      { label: "No referral", value: "1 Wicket", points: 1, accent: "purple" },
-      { label: "Absent", value: "1 Wicket", points: 1, accent: "purple" },
-    ];
-  }
-
-  dplData.weeklyMatches.forEach((match) => {
-    if (!match.battingTeam) match.battingTeam = match.teamA;
-    if (!match.bowlingTeam) match.bowlingTeam = match.teamB;
-  });
-}
-
-function renderCriteriaEditorRow(rule, index, type) {
-  return `
-    <div class="admin-row">
-      ${field("Criteria", `${type}-${index}-label`, rule.label)}
-      ${field("Display", `${type}-${index}-value`, rule.value)}
-      ${field("Points", `${type}-${index}-points`, rule.points, "number")}
-      ${field("Accent", `${type}-${index}-accent`, rule.accent)}
-      <button class="icon-btn danger" type="button" data-remove-criteria="${type}" data-index="${index}">
-        Remove
-      </button>
-    </div>
-  `;
-}
-
-function renderLiveMatchEditorRow(fixture, index) {
-  return `
-    <div class="admin-row admin-row-fixture">
-      ${field("Week", `weekly-${index}-week`, fixture.week, "number")}
-      ${field("Match No", `weekly-${index}-matchNo`, fixture.matchNo, "number")}
-
-      ${field("Team A", `weekly-${index}-teamA`, fixture.teamA)}
-      ${field("A Runs", `weekly-${index}-teamARuns`, fixture.teamARuns, "number")}
-      ${field("A Wickets", `weekly-${index}-teamAWickets`, fixture.teamAWickets, "number")}
-
-      ${field("Team B", `weekly-${index}-teamB`, fixture.teamB)}
-      ${field("B Runs", `weekly-${index}-teamBRuns`, fixture.teamBRuns, "number")}
-      ${field("B Wickets", `weekly-${index}-teamBWickets`, fixture.teamBWickets, "number")}
-
-      ${field("Batting Team", `weekly-${index}-battingTeam`, fixture.battingTeam || fixture.teamA)}
-      ${field("Bowling Team", `weekly-${index}-bowlingTeam`, fixture.bowlingTeam || fixture.teamB)}
-
-      ${field("Day", `weekly-${index}-day`, fixture.day, "number")}
-
-      <label class="field checkbox-field">
-        <input type="checkbox" id="weekly-${index}-powerplay" ${fixture.powerplay ? "checked" : ""} />
-        <span>Powerplay Active</span>
-      </label>
-
-      <button class="mini-btn" type="button" data-complete-match="${index}">
-        Complete Match
-      </button>
-
-      <button class="icon-btn danger" type="button" data-remove-live-match="${index}">
-        Remove Match
-      </button>
-    </div>
-  `;
-}
-
-function addLiveMatch() {
-  dplData.weeklyMatches.push({
-    week: 1,
-    matchNo: dplData.weeklyMatches.length + 1,
-    teamA: "Team A",
-    teamB: "Team B",
-    battingTeam: "Team A",
-    bowlingTeam: "Team B",
-    teamARuns: 0,
-    teamAWickets: 0,
-    teamBRuns: 0,
-    teamBWickets: 0,
-    day: 1,
-    powerplay: false,
-    status: "Live",
-    performances: [],
-  });
-
-  saveLeagueData();
-  renderAll();
-  renderAdminPanel("Live match added.");
-}
-
-function completeLiveMatch(index) {
-  dplData = collectAdminFormData();
-
-  const match = dplData.weeklyMatches[index];
-  if (!match) return;
-
-  const completed = {
-    ...match,
-    status: "Completed",
-    day: 6,
-    powerplay: false,
-    result: getMatchResult(match),
-  };
-
-  dplData.completedMatches.unshift(completed);
-  dplData.weeklyMatches.splice(index, 1);
-
-  dplData.weeklyMatches = dplData.weeklyMatches.map((m, i) => ({
-    ...m,
-    matchNo: i + 1,
-  }));
-
-  saveLeagueData();
-  renderAll();
-  renderAdminPanel("Match completed and moved to Previous Matches.");
-  showToast("Match moved to Previous Matches");
-}
-
-function addCriteria(type) {
-  ensureCriteriaStructure();
-
-  const newRule = {
-    label: "New Criteria",
-    value: type === "battingRules" ? "1 Run" : "1 Wicket",
-    points: 1,
-    accent: type === "battingRules" ? "orange" : "purple",
-  };
-
-  dplData.scoring[type].push(newRule);
-  saveLeagueData();
-  renderAll();
-  renderAdminPanel("Criteria added.");
-}
-
-function removeCriteria(type, index) {
-  ensureCriteriaStructure();
-
-  dplData.scoring[type].splice(index, 1);
-  saveLeagueData();
-  renderAll();
-  renderAdminPanel("Criteria removed.");
-}
-
-const oldCollectAdminFormData = collectAdminFormData;
-
-collectAdminFormData = function () {
-  ensureCriteriaStructure();
-
-  const data = oldCollectAdminFormData();
-
-  data.scoring = {
-    ...data.scoring,
-    battingRules: dplData.scoring.battingRules.map((rule, index) => ({
-      label: getValue(`battingRules-${index}-label`, rule.label),
-      value: getValue(`battingRules-${index}-value`, rule.value),
-      points: getNumber(`battingRules-${index}-points`, rule.points),
-      accent: getValue(`battingRules-${index}-accent`, rule.accent),
-    })),
-    bowlingRules: dplData.scoring.bowlingRules.map((rule, index) => ({
-      label: getValue(`bowlingRules-${index}-label`, rule.label),
-      value: getValue(`bowlingRules-${index}-value`, rule.value),
-      points: getNumber(`bowlingRules-${index}-points`, rule.points),
-      accent: getValue(`bowlingRules-${index}-accent`, rule.accent),
-    })),
-  };
-
-  data.weeklyMatches = dplData.weeklyMatches.map((fixture, index) => ({
-    ...fixture,
-    week: getNumber(`weekly-${index}-week`, fixture.week),
-    matchNo: getNumber(`weekly-${index}-matchNo`, fixture.matchNo),
-    teamA: getValue(`weekly-${index}-teamA`, fixture.teamA),
-    teamB: getValue(`weekly-${index}-teamB`, fixture.teamB),
-    teamARuns: getNumber(`weekly-${index}-teamARuns`, fixture.teamARuns),
-    teamAWickets: getNumber(`weekly-${index}-teamAWickets`, fixture.teamAWickets),
-    teamBRuns: getNumber(`weekly-${index}-teamBRuns`, fixture.teamBRuns),
-    teamBWickets: getNumber(`weekly-${index}-teamBWickets`, fixture.teamBWickets),
-    battingTeam: getValue(`weekly-${index}-battingTeam`, fixture.battingTeam || fixture.teamA),
-    bowlingTeam: getValue(`weekly-${index}-bowlingTeam`, fixture.bowlingTeam || fixture.teamB),
-    day: clamp(getNumber(`weekly-${index}-day`, fixture.day), 1, 6),
-    powerplay: Boolean(document.getElementById(`weekly-${index}-powerplay`)?.checked),
-    status: "Live",
-  }));
-
-  return data;
-};
-
-renderAdminPanel = function (message = "") {
-  ensureCriteriaStructure();
-
+function renderAdminPanel(message = "") {
   const form = document.querySelector("#adminForm");
   if (!form) return;
 
@@ -1479,64 +722,16 @@ renderAdminPanel = function (message = "") {
       </div>
     </div>
 
-    <section class="admin-panel-card">
-      <div class="admin-section-title"><span>01</span><h3>Live Matches</h3></div>
-      <p class="admin-helper">
-        Add/remove live matches, change batting/bowling team anytime, and complete matches to move them to Previous Matches.
-      </p>
-      <div class="admin-rows">
-        ${dplData.weeklyMatches.map(renderLiveMatchEditorRow).join("")}
-      </div>
-      <button class="mini-btn" type="button" id="addLiveMatch">Add Live Match</button>
-    </section>
-
-    <section class="admin-panel-card">
-      <div class="admin-section-title"><span>02</span><h3>Batting Scoring Criteria</h3></div>
-      <div class="admin-rows">
-        ${dplData.scoring.battingRules.map((rule, index) =>
-          renderCriteriaEditorRow(rule, index, "battingRules")
-        ).join("")}
-      </div>
-      <button class="mini-btn" type="button" data-add-criteria="battingRules">Add Batting Criteria</button>
-    </section>
-
-    <section class="admin-panel-card">
-      <div class="admin-section-title"><span>03</span><h3>Bowling / Wicket Criteria</h3></div>
-      <div class="admin-rows">
-        ${dplData.scoring.bowlingRules.map((rule, index) =>
-          renderCriteriaEditorRow(rule, index, "bowlingRules")
-        ).join("")}
-      </div>
-      <button class="mini-btn" type="button" data-add-criteria="bowlingRules">Add Bowling Criteria</button>
-    </section>
-
-    <section class="admin-panel-card">
-      <div class="admin-section-title"><span>04</span><h3>Leaderboard</h3></div>
-      <div class="admin-rows">
-        ${dplData.leaderboard.map(renderLeaderboardEditorRow).join("")}
-      </div>
-    </section>
-
-    <section class="admin-panel-card">
-      <div class="admin-section-title"><span>05</span><h3>Caps & Awards</h3></div>
-      <div class="admin-rows">
-        ${dplData.players.map(renderPlayerEditorRow).join("")}
-      </div>
-    </section>
-
-    <section class="admin-panel-card">
-      <div class="admin-section-title"><span>06</span><h3>Teams</h3></div>
-      <div class="admin-rows">
-        ${dplData.teams.map(renderTeamEditorRow).join("")}
-      </div>
-    </section>
-
-    <section class="admin-panel-card">
-      <div class="admin-section-title"><span>07</span><h3>Commentary Feed</h3></div>
-      <div class="admin-rows">
-        ${dplData.commentary.map(renderCommentaryEditorRow).join("")}
-      </div>
-    </section>
+    ${adminSection("01", "League Identity", renderLeagueEditor())}
+    ${adminSection("02", "Live Matches", renderLiveMatchesEditor(), "Add/remove live matches, change batting/bowling team, and complete match.")}
+    ${adminSection("03", "Previous Matches", renderCompletedEditor(), "Completed live matches appear here.")}
+    ${adminSection("04", "Batting Criteria", renderCriteriaEditor("battingRules"), "Add/remove batting scoring rules.")}
+    ${adminSection("05", "Bowling / Wicket Criteria", renderCriteriaEditor("bowlingRules"), "Add/remove bowling and wicket rules.")}
+    ${adminSection("06", "Leaderboard", renderLeaderboardEditor())}
+    ${adminSection("07", "Players / Awards", renderPlayersEditor())}
+    ${adminSection("08", "Auction Players", renderAuctionEditor())}
+    ${adminSection("09", "Teams", renderTeamsEditor())}
+    ${adminSection("10", "Commentary", renderCommentaryEditor())}
 
     <div class="admin-actions">
       <button class="btn btn-live" type="submit">Save Updates</button>
@@ -1546,94 +741,548 @@ renderAdminPanel = function (message = "") {
 
   form.onsubmit = handleAdminSubmit;
   form.onclick = handleAdminClick;
-};
+}
 
-const oldHandleAdminClick = handleAdminClick;
+function adminSection(no, title, content, helper = "") {
+  return `
+    <section class="admin-panel-card">
+      <div class="admin-section-title"><span>${no}</span><h3>${title}</h3></div>
+      ${helper ? `<p class="admin-helper">${helper}</p>` : ""}
+      ${content}
+    </section>
+  `;
+}
 
-handleAdminClick = function (event) {
-  const completeBtn = event.target.closest("[data-complete-match]");
+function renderAdminLogin(message = "") {
+  const form = document.querySelector("#adminForm");
+  if (!form) return;
+
+  form.innerHTML = `
+    <section class="admin-login-card">
+      <div class="admin-section-title"><span>PW</span><h3>Password Required</h3></div>
+      <p class="admin-note">Enter admin password to edit DPL data.</p>
+      ${field("Password", "adminLoginPassword", "", "password")}
+      <div class="admin-status">${escapeHtml(message)}</div>
+      <div class="admin-actions static-actions">
+        <button class="btn btn-live" type="submit">Unlock Admin Panel</button>
+      </div>
+    </section>
+  `;
+
+  form.onsubmit = handleAdminLogin;
+}
+
+function renderLeagueEditor() {
+  return `
+    <div class="admin-grid">
+      ${field("Title", "league-title", dplData.league.title)}
+      ${field("Subtitle", "league-subtitle", dplData.league.subtitle)}
+      ${field("Auction Date", "league-auction", dplData.league.auctionDate)}
+      ${field("Start Date", "league-start", dplData.league.startDate)}
+      ${field("Finale", "league-finale", dplData.league.finale)}
+    </div>
+  `;
+}
+
+function renderLiveMatchesEditor() {
+  return `
+    <div class="admin-rows">
+      ${dplData.weeklyMatches.map(renderLiveMatchRow).join("")}
+    </div>
+    <button class="mini-btn" type="button" data-add="liveMatch">Add Live Match</button>
+  `;
+}
+
+function renderLiveMatchRow(match, index) {
+  return `
+    <div class="admin-row admin-row-fixture">
+      ${field("Week", `live-${index}-week`, match.week, "number")}
+      ${field("Match No", `live-${index}-matchNo`, match.matchNo, "number")}
+      ${field("Team A", `live-${index}-teamA`, match.teamA)}
+      ${field("A Runs", `live-${index}-teamARuns`, match.teamARuns, "number")}
+      ${field("A Wickets", `live-${index}-teamAWickets`, match.teamAWickets, "number")}
+      ${field("Team B", `live-${index}-teamB`, match.teamB)}
+      ${field("B Runs", `live-${index}-teamBRuns`, match.teamBRuns, "number")}
+      ${field("B Wickets", `live-${index}-teamBWickets`, match.teamBWickets, "number")}
+      ${field("Batting Team", `live-${index}-battingTeam`, match.battingTeam || match.teamA)}
+      ${field("Bowling Team", `live-${index}-bowlingTeam`, match.bowlingTeam || match.teamB)}
+      ${field("Day", `live-${index}-day`, match.day, "number")}
+
+      <label class="field checkbox-field">
+        <input type="checkbox" id="live-${index}-powerplay" ${match.powerplay ? "checked" : ""} />
+        <span>Powerplay</span>
+      </label>
+
+      <button class="mini-btn" type="button" data-complete="${index}">Complete</button>
+      <button class="icon-btn danger" type="button" data-remove="weeklyMatches" data-index="${index}">Remove</button>
+    </div>
+  `;
+}
+
+function renderCompletedEditor() {
+  return `
+    <div class="admin-rows">
+      ${dplData.completedMatches.map(renderCompletedRow).join("") || `<div class="loading-card">No previous matches yet.</div>`}
+    </div>
+    <button class="mini-btn" type="button" data-add="completedMatch">Add Previous Match</button>
+  `;
+}
+
+function renderCompletedRow(match, index) {
+  return `
+    <div class="admin-row admin-row-fixture">
+      ${field("Week", `completed-${index}-week`, match.week, "number")}
+      ${field("Match No", `completed-${index}-matchNo`, match.matchNo, "number")}
+      ${field("Team A", `completed-${index}-teamA`, match.teamA)}
+      ${field("A Runs", `completed-${index}-teamARuns`, match.teamARuns, "number")}
+      ${field("A Wickets", `completed-${index}-teamAWickets`, match.teamAWickets, "number")}
+      ${field("Team B", `completed-${index}-teamB`, match.teamB)}
+      ${field("B Runs", `completed-${index}-teamBRuns`, match.teamBRuns, "number")}
+      ${field("B Wickets", `completed-${index}-teamBWickets`, match.teamBWickets, "number")}
+      ${field("Result", `completed-${index}-result`, match.result || getMatchResult(match))}
+      <button class="icon-btn danger" type="button" data-remove="completedMatches" data-index="${index}">Remove</button>
+    </div>
+  `;
+}
+
+function renderCriteriaEditor(type) {
+  return `
+    <div class="admin-rows">
+      ${dplData.scoring[type].map((rule, index) => `
+        <div class="admin-row">
+          ${field("Criteria", `${type}-${index}-label`, rule.label)}
+          ${field("Display", `${type}-${index}-value`, rule.value)}
+          ${field("Points", `${type}-${index}-points`, rule.points, "number")}
+          ${field("Accent", `${type}-${index}-accent`, rule.accent)}
+          <button class="icon-btn danger" type="button" data-remove-criteria="${type}" data-index="${index}">Remove</button>
+        </div>
+      `).join("")}
+    </div>
+    <button class="mini-btn" type="button" data-add-criteria="${type}">
+      Add ${type === "battingRules" ? "Batting" : "Bowling"} Criteria
+    </button>
+  `;
+}
+
+function renderLeaderboardEditor() {
+  return `
+    <div class="admin-rows">
+      ${dplData.leaderboard.map((row, index) => `
+        <div class="admin-row">
+          ${field("Team", `leader-${index}-team`, row.team)}
+          ${field("Matches", `leader-${index}-matches`, row.matches, "number")}
+          ${field("Wins", `leader-${index}-wins`, row.wins, "number")}
+          ${field("Points", `leader-${index}-points`, row.points, "number")}
+          ${field("NRR", `leader-${index}-nrr`, row.nrr)}
+          <button class="icon-btn danger" type="button" data-remove="leaderboard" data-index="${index}">Remove</button>
+        </div>
+      `).join("")}
+    </div>
+    <button class="mini-btn" type="button" data-add="leaderboard">Add Team Row</button>
+  `;
+}
+
+function renderPlayersEditor() {
+  return `
+    <div class="admin-rows">
+      ${dplData.players.map((player, index) => `
+        <div class="admin-row">
+          ${field("Name", `player-${index}-name`, player.name)}
+          ${field("Team", `player-${index}-team`, player.team || "")}
+          ${field("Runs", `player-${index}-runs`, player.runs, "number")}
+          ${field("Visitors", `player-${index}-visitors`, player.visitors, "number")}
+          ${field("Closures", `player-${index}-closures`, player.closures, "number")}
+          ${field("Wickets", `player-${index}-wickets`, player.wickets, "number")}
+          <button class="icon-btn danger" type="button" data-remove="players" data-index="${index}">Remove</button>
+        </div>
+      `).join("")}
+    </div>
+    <button class="mini-btn" type="button" data-add="players">Add Player</button>
+  `;
+}
+
+function renderAuctionEditor() {
+  return `
+    <div class="admin-rows">
+      ${dplData.auctionPlayers.map((player, index) => `
+        <div class="admin-row">
+          ${field("Name", `auction-${index}-name`, player.name)}
+          ${field("Role", `auction-${index}-role`, player.role)}
+          ${field("Rating", `auction-${index}-rating`, player.rating, "number")}
+          <button class="icon-btn danger" type="button" data-remove="auctionPlayers" data-index="${index}">Remove</button>
+        </div>
+      `).join("")}
+    </div>
+    <button class="mini-btn" type="button" data-add="auctionPlayers">Add Auction Player</button>
+  `;
+}
+
+function renderTeamsEditor() {
+  return `
+    <div class="admin-rows">
+      ${dplData.teams.map((team, index) => `
+        <div class="admin-row admin-row-wide">
+          ${field("Team Name", `team-${index}-name`, team.name)}
+          ${field("Captain", `team-${index}-captain`, team.captain)}
+          ${textarea("Players, one per line", `team-${index}-players`, team.players.join("\n"))}
+          <button class="icon-btn danger" type="button" data-remove="teams" data-index="${index}">Remove</button>
+        </div>
+      `).join("")}
+    </div>
+    <button class="mini-btn" type="button" data-add="teams">Add Team</button>
+  `;
+}
+
+function renderCommentaryEditor() {
+  return `
+    <div class="admin-rows">
+      ${dplData.commentary.map((item, index) => `
+        <div class="admin-row">
+          ${field("Time", `commentary-${index}-time`, item.time)}
+          ${field("Text", `commentary-${index}-text`, item.text)}
+          <button class="icon-btn danger" type="button" data-remove="commentary" data-index="${index}">Remove</button>
+        </div>
+      `).join("")}
+    </div>
+    <button class="mini-btn" type="button" data-add="commentary">Add Commentary</button>
+  `;
+}
+
+/* ---------- ADMIN ACTIONS ---------- */
+
+function handleAdminLogin(event) {
+  event.preventDefault();
+
+  if (getValue("adminLoginPassword") === dplData.security.adminPassword) {
+    setAdminAuthed(true);
+    renderAdminPanel("Admin unlocked.");
+    showToast("Admin unlocked");
+  } else {
+    renderAdminLogin("Incorrect password.");
+  }
+}
+
+function handleAdminSubmit(event) {
+  event.preventDefault();
+  dplData = collectAdminFormData();
+  saveLeagueData();
+  renderAll();
+  renderAdminPanel("Saved successfully.");
+}
+
+function handleAdminClick(event) {
+  const completeBtn = event.target.closest("[data-complete]");
   if (completeBtn) {
-    completeLiveMatch(Number(completeBtn.dataset.completeMatch));
+    completeMatch(Number(completeBtn.dataset.complete));
     return;
   }
 
-  const removeLiveBtn = event.target.closest("[data-remove-live-match]");
-  if (removeLiveBtn) {
+  const removeBtn = event.target.closest("[data-remove]");
+  if (removeBtn) {
     dplData = collectAdminFormData();
-    dplData.weeklyMatches.splice(Number(removeLiveBtn.dataset.removeLiveMatch), 1);
+    dplData[removeBtn.dataset.remove].splice(Number(removeBtn.dataset.index), 1);
     saveLeagueData();
     renderAll();
-    renderAdminPanel("Live match removed.");
+    renderAdminPanel("Removed successfully.");
     return;
   }
 
-  const addLiveBtn = event.target.closest("#addLiveMatch");
-  if (addLiveBtn) {
+  const addBtn = event.target.closest("[data-add]");
+  if (addBtn) {
     dplData = collectAdminFormData();
-    addLiveMatch();
+    addItem(addBtn.dataset.add);
+    saveLeagueData();
+    renderAll();
+    renderAdminPanel("Added successfully.");
     return;
   }
 
   const addCriteriaBtn = event.target.closest("[data-add-criteria]");
   if (addCriteriaBtn) {
     dplData = collectAdminFormData();
-    addCriteria(addCriteriaBtn.dataset.addCriteria);
+    dplData.scoring[addCriteriaBtn.dataset.addCriteria].push({
+      label: "New Criteria",
+      value: "1",
+      points: 1,
+      accent: "blue",
+    });
+    saveLeagueData();
+    renderAll();
+    renderAdminPanel("Criteria added.");
     return;
   }
 
   const removeCriteriaBtn = event.target.closest("[data-remove-criteria]");
   if (removeCriteriaBtn) {
     dplData = collectAdminFormData();
-    removeCriteria(
-      removeCriteriaBtn.dataset.removeCriteria,
-      Number(removeCriteriaBtn.dataset.index)
-    );
+    dplData.scoring[removeCriteriaBtn.dataset.removeCriteria].splice(Number(removeCriteriaBtn.dataset.index), 1);
+    saveLeagueData();
+    renderAll();
+    renderAdminPanel("Criteria removed.");
     return;
   }
 
-  oldHandleAdminClick(event);
-};
-
-renderScoringRules = function () {
-  ensureCriteriaStructure();
-
-  const rulesGrid = document.querySelector("#scoringRulesGrid");
-  const formula = document.querySelector("#scoringFormula");
-
-  if (rulesGrid) {
-    rulesGrid.innerHTML = `
-      <article class="score-tile accent-blue">
-        <span>Batting</span>
-        <strong>Run Scoring</strong>
-      </article>
-
-      ${dplData.scoring.battingRules.map(rule => `
-        <article class="score-tile accent-${escapeHtml(rule.accent)}">
-          <span>${escapeHtml(rule.value)}</span>
-          <strong>${escapeHtml(rule.label)}</strong>
-        </article>
-      `).join("")}
-
-      <article class="score-tile accent-purple">
-        <span>Bowling</span>
-        <strong>Wickets / Pressure</strong>
-      </article>
-
-      ${dplData.scoring.bowlingRules.map(rule => `
-        <article class="score-tile accent-${escapeHtml(rule.accent)}">
-          <span>${escapeHtml(rule.value)}</span>
-          <strong>${escapeHtml(rule.label)}</strong>
-        </article>
-      `).join("")}
-    `;
+  if (event.target.closest("#logoutAdmin")) {
+    setAdminAuthed(false);
+    renderAdminPanel("Logged out.");
+    return;
   }
 
-  if (formula) {
-    formula.textContent = `${dplData.scoring.finalFormula} | Batting Powerplay = ${dplData.scoring.powerplayMultiplier}X Runs`;
+  if (event.target.closest("#resetData")) {
+    dplData = clone(defaultData);
+    clearLeagueData();
+    setAdminAuthed(false);
+    renderAll();
+    renderAdminPanel("Demo data restored.");
+    return;
   }
-};
 
-ensureCriteriaStructure();
-saveLeagueData(false);
+  if (event.target.closest("#exportBackupBtn")) {
+    exportLeagueData();
+  }
+}
+
+function completeMatch(index) {
+  dplData = collectAdminFormData();
+
+  const match = dplData.weeklyMatches[index];
+  if (!match) return;
+
+  const completed = {
+    ...match,
+    status: "Completed",
+    day: 6,
+    powerplay: false,
+    result: getMatchResult(match),
+  };
+
+  dplData.completedMatches.unshift(completed);
+  dplData.weeklyMatches.splice(index, 1);
+
+  saveLeagueData();
+  renderAll();
+  renderAdminPanel("Match completed and moved to Previous Matches.");
+  showToast("Match completed");
+}
+
+function addItem(type) {
+  const map = {
+    liveMatch: {
+      week: 1,
+      matchNo: dplData.weeklyMatches.length + 1,
+      teamA: "Team A",
+      teamB: "Team B",
+      battingTeam: "Team A",
+      bowlingTeam: "Team B",
+      teamARuns: 0,
+      teamAWickets: 0,
+      teamBRuns: 0,
+      teamBWickets: 0,
+      day: 1,
+      powerplay: false,
+      status: "Live",
+      performances: [],
+    },
+    completedMatch: {
+      week: 1,
+      matchNo: dplData.completedMatches.length + 1,
+      teamA: "Team A",
+      teamB: "Team B",
+      battingTeam: "Team A",
+      bowlingTeam: "Team B",
+      teamARuns: 0,
+      teamAWickets: 0,
+      teamBRuns: 0,
+      teamBWickets: 0,
+      day: 6,
+      powerplay: false,
+      status: "Completed",
+      result: "Result pending",
+      performances: [],
+    },
+    leaderboard: { team: "New Team", matches: 0, wins: 0, points: 0, nrr: "+0.00" },
+    players: { name: "New Player", team: "Team", runs: 0, visitors: 0, closures: 0, wickets: 0 },
+    auctionPlayers: { name: "New Player", role: "Role", rating: 80 },
+    teams: { name: "New Team", captain: "Captain", players: ["Player 1"] },
+    commentary: { time: "00:00", text: "New update." },
+  };
+
+  if (type === "liveMatch") dplData.weeklyMatches.push(map.liveMatch);
+  else if (type === "completedMatch") dplData.completedMatches.push(map.completedMatch);
+  else dplData[type].push(map[type]);
+}
+
+/* ---------- FORM COLLECTION ---------- */
+
+function collectAdminFormData() {
+  return {
+    ...dplData,
+
+    league: {
+      ...dplData.league,
+      title: getValue("league-title", dplData.league.title),
+      subtitle: getValue("league-subtitle", dplData.league.subtitle),
+      auctionDate: getValue("league-auction", dplData.league.auctionDate),
+      startDate: getValue("league-start", dplData.league.startDate),
+      finale: getValue("league-finale", dplData.league.finale),
+    },
+
+    weeklyMatches: dplData.weeklyMatches.map((match, index) => ({
+      ...match,
+      week: getNumber(`live-${index}-week`, match.week),
+      matchNo: getNumber(`live-${index}-matchNo`, match.matchNo),
+      teamA: getValue(`live-${index}-teamA`, match.teamA),
+      teamB: getValue(`live-${index}-teamB`, match.teamB),
+      teamARuns: getNumber(`live-${index}-teamARuns`, match.teamARuns),
+      teamAWickets: getNumber(`live-${index}-teamAWickets`, match.teamAWickets),
+      teamBRuns: getNumber(`live-${index}-teamBRuns`, match.teamBRuns),
+      teamBWickets: getNumber(`live-${index}-teamBWickets`, match.teamBWickets),
+      battingTeam: getValue(`live-${index}-battingTeam`, match.battingTeam),
+      bowlingTeam: getValue(`live-${index}-bowlingTeam`, match.bowlingTeam),
+      day: clamp(getNumber(`live-${index}-day`, match.day), 1, 6),
+      powerplay: Boolean(document.getElementById(`live-${index}-powerplay`)?.checked),
+      status: "Live",
+    })),
+
+    completedMatches: dplData.completedMatches.map((match, index) => ({
+      ...match,
+      week: getNumber(`completed-${index}-week`, match.week),
+      matchNo: getNumber(`completed-${index}-matchNo`, match.matchNo),
+      teamA: getValue(`completed-${index}-teamA`, match.teamA),
+      teamB: getValue(`completed-${index}-teamB`, match.teamB),
+      teamARuns: getNumber(`completed-${index}-teamARuns`, match.teamARuns),
+      teamAWickets: getNumber(`completed-${index}-teamAWickets`, match.teamAWickets),
+      teamBRuns: getNumber(`completed-${index}-teamBRuns`, match.teamBRuns),
+      teamBWickets: getNumber(`completed-${index}-teamBWickets`, match.teamBWickets),
+      result: getValue(`completed-${index}-result`, match.result),
+      status: "Completed",
+    })),
+
+    scoring: {
+      ...dplData.scoring,
+      battingRules: dplData.scoring.battingRules.map((rule, index) => ({
+        label: getValue(`battingRules-${index}-label`, rule.label),
+        value: getValue(`battingRules-${index}-value`, rule.value),
+        points: getNumber(`battingRules-${index}-points`, rule.points),
+        accent: getValue(`battingRules-${index}-accent`, rule.accent),
+      })),
+      bowlingRules: dplData.scoring.bowlingRules.map((rule, index) => ({
+        label: getValue(`bowlingRules-${index}-label`, rule.label),
+        value: getValue(`bowlingRules-${index}-value`, rule.value),
+        points: getNumber(`bowlingRules-${index}-points`, rule.points),
+        accent: getValue(`bowlingRules-${index}-accent`, rule.accent),
+      })),
+    },
+
+    leaderboard: dplData.leaderboard.map((row, index) => ({
+      team: getValue(`leader-${index}-team`, row.team),
+      matches: getNumber(`leader-${index}-matches`, row.matches),
+      wins: getNumber(`leader-${index}-wins`, row.wins),
+      points: getNumber(`leader-${index}-points`, row.points),
+      nrr: getValue(`leader-${index}-nrr`, row.nrr),
+    })),
+
+    players: dplData.players.map((player, index) => ({
+      name: getValue(`player-${index}-name`, player.name),
+      team: getValue(`player-${index}-team`, player.team),
+      runs: getNumber(`player-${index}-runs`, player.runs),
+      visitors: getNumber(`player-${index}-visitors`, player.visitors),
+      closures: getNumber(`player-${index}-closures`, player.closures),
+      wickets: getNumber(`player-${index}-wickets`, player.wickets),
+    })),
+
+    auctionPlayers: dplData.auctionPlayers.map((player, index) => ({
+      name: getValue(`auction-${index}-name`, player.name),
+      role: getValue(`auction-${index}-role`, player.role),
+      rating: getNumber(`auction-${index}-rating`, player.rating),
+    })),
+
+    teams: dplData.teams.map((team, index) => ({
+      name: getValue(`team-${index}-name`, team.name),
+      captain: getValue(`team-${index}-captain`, team.captain),
+      players: getValue(`team-${index}-players`, team.players.join("\n"))
+        .split("\n")
+        .map((x) => x.trim())
+        .filter(Boolean),
+    })),
+
+    commentary: dplData.commentary.map((item, index) => ({
+      time: getValue(`commentary-${index}-time`, item.time),
+      text: getValue(`commentary-${index}-text`, item.text),
+    })),
+  };
+}
+
+/* ---------- BACKUP + AUTOSAVE ---------- */
+
+function exportLeagueData() {
+  const blob = new Blob([JSON.stringify(dplData, null, 2)], {
+    type: "application/json",
+  });
+
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "dpl-2-backup.json";
+  link.click();
+
+  URL.revokeObjectURL(link.href);
+  showToast("Backup downloaded");
+}
+
+function triggerAutosave() {
+  if (!document.querySelector("#adminForm") || !isAdminAuthed()) return;
+
+  clearTimeout(autosaveTimer);
+
+  autosaveTimer = setTimeout(() => {
+    try {
+      dplData = collectAdminFormData();
+      saveLeagueData(false);
+      renderAll();
+      const status = document.querySelector("#adminStatus");
+      if (status) status.textContent = "Autosaved";
+    } catch {}
+  }, 1200);
+}
+
+/* ---------- BOOT ---------- */
+
+function renderAll() {
+  renderLeagueShell();
+  renderAuctionPlayers();
+  renderScoreboard();
+  renderWeeklyFixtures();
+  renderCompletedMatches();
+  renderScoringRules();
+  renderLeaderboard();
+  renderCaps();
+  renderTeams();
+  renderCommentary();
+  addLiveClock();
+}
+
+document.addEventListener("click", (event) => {
+  const fixture = event.target.closest("[data-match-index]");
+  if (fixture) {
+    openMatchDetails(Number(fixture.dataset.matchIndex), fixture.dataset.matchCollection);
+    return;
+  }
+
+  if (event.target.closest("[data-close-modal]")) closeMatchDetails();
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") closeMatchDetails();
+});
+
+document.addEventListener("input", (event) => {
+  if (event.target.closest("#adminForm")) triggerAutosave();
+});
+
+document.addEventListener("change", (event) => {
+  if (event.target.closest("#adminForm")) triggerAutosave();
+});
+
+injectUpgradeCss();
 renderAll();
-renderAdminPanel("Admin upgraded.");
+renderAdminPanel();

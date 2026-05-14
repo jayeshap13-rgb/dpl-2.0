@@ -1,8 +1,8 @@
-const STORAGE_KEY = "dpl-2-advanced-engine-v1";
+const STORAGE_KEY = "dpl-2-advanced-engine-v2";
 const ADMIN_AUTH_KEY = "dpl-admin-auth";
 const ADMIN_PASSWORD = "DPL@2026";
 
-const SCORING_RULES = {
+const DEFAULT_PLAYER_SCORING_RULES = {
   present: { label: "Present", runs: 6, balls: 1 },
   substitute: { label: "Substitute", runs: 4, balls: 1 },
   medical: { label: "Medical", runs: 2, balls: 1 },
@@ -15,8 +15,11 @@ const SCORING_RULES = {
   tyfcb: { label: "TYFCB ₹1 Lakh", runs: 1, balls: 1 },
   visitorAttended: { label: "Visitor Attended After Registration", runs: 25, balls: 6 },
   induction: { label: "Induction", runs: 100, balls: 25 },
-  meetup: { label: "Team Meetup", runs: 5, balls: 0 },
-  powerDate: { label: "Power Date", runs: 7, balls: 0 },
+};
+
+const DEFAULT_TEAM_EXTRA_RULES = {
+  meetup: { label: "Team Meetup / Sports / Café", runs: 5 },
+  powerDate: { label: "Power Date", runs: 7 },
 };
 
 const defaultData = {
@@ -30,6 +33,9 @@ const defaultData = {
     totalPlayers: 36,
     totalMatches: 10,
   },
+
+  scoringRules: clonePlain(DEFAULT_PLAYER_SCORING_RULES),
+  extraRules: clonePlain(DEFAULT_TEAM_EXTRA_RULES),
 
   teams: [
     {
@@ -58,10 +64,7 @@ const defaultData = {
     },
   ],
 
-  matches: [
-    createMatch(1, 1, "Spark Syndicate", "Invincible Titans"),
-    createMatch(1, 2, "Stellar Strikers", "Cover Drive Champions"),
-  ],
+  matches: [],
 
   completedMatches: [],
 
@@ -71,36 +74,17 @@ const defaultData = {
   ],
 };
 
+defaultData.matches = [
+  createMatch(1, 1, "Spark Syndicate", "Invincible Titans"),
+  createMatch(1, 2, "Stellar Strikers", "Cover Drive Champions"),
+];
+
 let dpl = loadData();
 
-/* -------------------- BASIC HELPERS -------------------- */
+/* ---------------- BASIC HELPERS ---------------- */
 
-function createMatch(week, matchNo, teamA, teamB) {
-  return {
-    id: `M${Date.now()}${Math.floor(Math.random() * 9999)}`,
-    week,
-    matchNo,
-    teamA,
-    teamB,
-    battingTeam: teamA,
-    bowlingTeam: teamB,
-    day: 1,
-    innings: "1st Innings",
-    tossWinner: "",
-    tossDecision: "Bat",
-    powerplay: true,
-    teamAImposter: "",
-    teamBImposter: "",
-    teamAOpeners: [],
-    teamBOpeners: [],
-    teamABowlers: [],
-    teamBBowlers: [],
-    battingStats: [],
-    bowlingStats: [],
-    motm: "",
-    mvp: "",
-    status: "Live",
-  };
+function clonePlain(value) {
+  return JSON.parse(JSON.stringify(value));
 }
 
 function clone(value) {
@@ -128,13 +112,33 @@ function qsa(selector) {
   return Array.from(document.querySelectorAll(selector));
 }
 
+function cssId(id) {
+  if (window.CSS && CSS.escape) return CSS.escape(id);
+  return String(id).replace(/[^a-zA-Z0-9_-]/g, "\\$&");
+}
+
+function val(id, fallback = "") {
+  const el = qs(`#${cssId(id)}`);
+  return el ? el.value.trim() : fallback;
+}
+
+function valNum(id, fallback = 0) {
+  return num(val(id, fallback), fallback);
+}
+
+function checked(id) {
+  return Boolean(qs(`#${cssId(id)}`)?.checked);
+}
+
 function initials(name = "") {
-  return String(name)
-    .split(" ")
-    .map((x) => x[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase() || "NA";
+  return (
+    String(name)
+      .split(" ")
+      .map((x) => x[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "NA"
+  );
 }
 
 function strikeRate(runs, balls) {
@@ -149,6 +153,13 @@ function economy(runs, balls) {
   return balls ? (runs / balls).toFixed(2) : "0.00";
 }
 
+function splitLines(value) {
+  return String(value || "")
+    .split("\n")
+    .map((x) => x.trim())
+    .filter(Boolean);
+}
+
 function teamByName(name) {
   return dpl.teams.find((t) => t.name === name);
 }
@@ -157,32 +168,62 @@ function playersOfTeam(teamName) {
   return teamByName(teamName)?.players || [];
 }
 
-function uniquePlayers() {
-  const map = new Map();
-  dpl.teams.forEach((team) => {
-    (team.players || []).forEach((name) => {
-      if (name) map.set(name, { name, team: team.name });
-    });
-  });
-  return Array.from(map.values());
+function createMatch(week, matchNo, teamA, teamB) {
+  return {
+    id: `M${Date.now()}${Math.floor(Math.random() * 9999)}`,
+    week,
+    matchNo,
+    teamA,
+    teamB,
+    battingTeam: teamA,
+    bowlingTeam: teamB,
+    day: 1,
+    innings: "1st Innings",
+    tossWinner: "",
+    tossDecision: "Bat",
+    powerplay: true,
+
+    teamAImposter: "",
+    teamBImposter: "",
+
+    teamAOpeners: [],
+    teamBOpeners: [],
+
+    teamABowlers: [],
+    teamBBowlers: [],
+
+    teamExtras: {
+      [teamA]: {},
+      [teamB]: {},
+    },
+
+    teamAExtraAdjustment: 0,
+    teamBExtraAdjustment: 0,
+
+    battingStats: [],
+    bowlingStats: [],
+
+    motm: "",
+    mvp: "",
+    status: "Live",
+  };
 }
 
-/* -------------------- STORAGE -------------------- */
+/* ---------------- STORAGE ---------------- */
 
 function loadData() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) return clone(defaultData);
-    const parsed = JSON.parse(saved);
-    return normalizeData(parsed);
+    if (!saved) return normalizeData(clone(defaultData));
+    return normalizeData(JSON.parse(saved));
   } catch {
-    return clone(defaultData);
+    return normalizeData(clone(defaultData));
   }
 }
 
-function saveData() {
+function saveData(show = true) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(dpl));
-  showToast("Saved");
+  if (show) showToast("Saved");
 }
 
 function normalizeData(data) {
@@ -190,33 +231,67 @@ function normalizeData(data) {
     ...clone(defaultData),
     ...data,
     league: { ...defaultData.league, ...(data.league || {}) },
+    scoringRules: { ...clone(DEFAULT_PLAYER_SCORING_RULES), ...(data.scoringRules || {}) },
+    extraRules: { ...clone(DEFAULT_TEAM_EXTRA_RULES), ...(data.extraRules || {}) },
     teams: Array.isArray(data.teams) ? data.teams : clone(defaultData.teams),
     matches: Array.isArray(data.matches) ? data.matches : clone(defaultData.matches),
     completedMatches: Array.isArray(data.completedMatches) ? data.completedMatches : [],
     commentary: Array.isArray(data.commentary) ? data.commentary : clone(defaultData.commentary),
   };
 
+  delete merged.scoringRules.meetup;
+  delete merged.scoringRules.powerDate;
+
   merged.matches = merged.matches.map((m, i) => ({
     ...createMatch(m.week || 1, m.matchNo || i + 1, m.teamA || "", m.teamB || ""),
     ...m,
+    teamABowlers: Array.isArray(m.teamABowlers) ? m.teamABowlers.slice(0, 3) : [],
+    teamBBowlers: Array.isArray(m.teamBBowlers) ? m.teamBBowlers.slice(0, 3) : [],
     battingStats: Array.isArray(m.battingStats) ? m.battingStats : [],
     bowlingStats: Array.isArray(m.bowlingStats) ? m.bowlingStats : [],
+    teamExtras: m.teamExtras || {},
+  }));
+
+  merged.completedMatches = merged.completedMatches.map((m) => ({
+    ...m,
+    battingStats: Array.isArray(m.battingStats) ? m.battingStats : [],
+    bowlingStats: Array.isArray(m.bowlingStats) ? m.bowlingStats : [],
+    teamExtras: m.teamExtras || {},
   }));
 
   return merged;
 }
 
-/* -------------------- CALCULATION ENGINE -------------------- */
+/* ---------------- SCORE ENGINE ---------------- */
 
 function emptyActivities() {
   const obj = {};
-  Object.keys(SCORING_RULES).forEach((key) => {
+  Object.keys(dpl.scoringRules || DEFAULT_PLAYER_SCORING_RULES).forEach((key) => {
     obj[key] = 0;
   });
   return obj;
 }
 
+function ensureMatchExtras(match) {
+  match.teamExtras = match.teamExtras || {};
+  match.teamExtras[match.teamA] = match.teamExtras[match.teamA] || {};
+  match.teamExtras[match.teamB] = match.teamExtras[match.teamB] || {};
+
+  Object.keys(dpl.extraRules || {}).forEach((key) => {
+    match.teamExtras[match.teamA][key] = num(match.teamExtras[match.teamA][key]);
+    match.teamExtras[match.teamB][key] = num(match.teamExtras[match.teamB][key]);
+  });
+
+  match.teamAExtraAdjustment = num(match.teamAExtraAdjustment);
+  match.teamBExtraAdjustment = num(match.teamBExtraAdjustment);
+}
+
 function ensureScorecards(match) {
+  match.teamABowlers = (match.teamABowlers || []).slice(0, 3);
+  match.teamBBowlers = (match.teamBBowlers || []).slice(0, 3);
+
+  ensureMatchExtras(match);
+
   const matchTeams = [match.teamA, match.teamB];
 
   matchTeams.forEach((teamName) => {
@@ -233,35 +308,64 @@ function ensureScorecards(match) {
           manualBalls: 0,
         });
       }
-
-      if (!match.bowlingStats.some((p) => p.name === playerName && p.team === teamName)) {
-        match.bowlingStats.push({
-          name: playerName,
-          team: teamName,
-          day: "",
-          wickets: 0,
-          specificWickets: 0,
-          ballsBowled: 0,
-          runsConceded: 0,
-        });
-      }
     });
   });
 
+  match.battingStats.forEach((player) => {
+    player.activities = player.activities || {};
+    Object.keys(dpl.scoringRules || {}).forEach((key) => {
+      player.activities[key] = num(player.activities[key]);
+    });
+    Object.keys(player.activities).forEach((key) => {
+      if (!dpl.scoringRules[key]) delete player.activities[key];
+    });
+  });
+
+  if (!match.teamABowlers.length) {
+    match.teamABowlers = playersOfTeam(match.teamA).slice(0, 3);
+  }
+
+  if (!match.teamBBowlers.length) {
+    match.teamBBowlers = playersOfTeam(match.teamB).slice(0, 3);
+  }
+
+  const selectedBowlers = [
+    ...match.teamABowlers.slice(0, 3).map((name) => ({ name, team: match.teamA })),
+    ...match.teamBBowlers.slice(0, 3).map((name) => ({ name, team: match.teamB })),
+  ].filter((b) => b.name);
+
+  selectedBowlers.forEach((bowler) => {
+    if (!match.bowlingStats.some((p) => p.name === bowler.name && p.team === bowler.team)) {
+      match.bowlingStats.push({
+        name: bowler.name,
+        team: bowler.team,
+        day: "",
+        wickets: 0,
+        specificWickets: 0,
+        ballsBowled: 0,
+        runsConceded: 0,
+      });
+    }
+  });
+
   match.battingStats = match.battingStats.filter((p) => matchTeams.includes(p.team));
-  match.bowlingStats = match.bowlingStats.filter((p) => matchTeams.includes(p.team));
+
+  match.bowlingStats = match.bowlingStats.filter((p) =>
+    selectedBowlers.some((b) => b.name === p.name && b.team === p.team)
+  );
 }
 
 function calculatePlayerBatting(player, match) {
   let runs = 0;
   let balls = 0;
 
+  const rules = dpl.scoringRules || DEFAULT_PLAYER_SCORING_RULES;
   const activities = player.activities || {};
 
-  Object.entries(SCORING_RULES).forEach(([key, rule]) => {
+  Object.entries(rules).forEach(([key, rule]) => {
     const qty = num(activities[key]);
-    runs += qty * rule.runs;
-    balls += qty * rule.balls;
+    runs += qty * num(rule.runs);
+    balls += qty * num(rule.balls);
   });
 
   runs += num(player.manualBonusRuns);
@@ -278,7 +382,7 @@ function calculatePlayerBatting(player, match) {
 
   runs -= num(player.penaltyRuns);
 
-  if (runs < 0) runs = 0;
+  runs = Math.max(0, runs);
 
   return {
     runs,
@@ -286,6 +390,22 @@ function calculatePlayerBatting(player, match) {
     sr: strikeRate(runs, balls),
     isOpener,
   };
+}
+
+function calculateTeamExtras(match, teamName) {
+  ensureMatchExtras(match);
+
+  const extras = match.teamExtras?.[teamName] || {};
+  let total = 0;
+
+  Object.entries(dpl.extraRules || {}).forEach(([key, rule]) => {
+    total += num(extras[key]) * num(rule.runs);
+  });
+
+  if (teamName === match.teamA) total += num(match.teamAExtraAdjustment);
+  if (teamName === match.teamB) total += num(match.teamBExtraAdjustment);
+
+  return total;
 }
 
 function calculateTeamScore(match, teamName) {
@@ -305,16 +425,16 @@ function calculateTeamScore(match, teamName) {
     if (p.out) wickets += 1;
   });
 
+  const extras = calculateTeamExtras(match, teamName);
+  runs += extras;
+
   const opponent = teamName === match.teamA ? match.teamB : match.teamA;
-  const opponentImposter =
-    teamName === match.teamA ? match.teamBImposter : match.teamAImposter;
+  const opponentImposter = teamName === match.teamA ? match.teamBImposter : match.teamAImposter;
 
   let imposterGain = 0;
 
   if (opponentImposter) {
-    const imposter = match.battingStats.find(
-      (p) => p.name === opponentImposter && p.team === opponent
-    );
+    const imposter = match.battingStats.find((p) => p.name === opponentImposter && p.team === opponent);
 
     if (imposter) {
       imposterGain = Math.floor(calculatePlayerBatting(imposter, match).runs * 0.5);
@@ -322,12 +442,15 @@ function calculateTeamScore(match, teamName) {
     }
   }
 
+  runs = Math.max(0, runs);
+
   return {
     runs,
     balls,
     wickets,
     rr: runRate(runs, balls),
     allOut,
+    extras,
     imposterGain,
   };
 }
@@ -349,7 +472,7 @@ function getResultText(match) {
   return `${winner} won by ${Math.abs(a.runs - b.runs)} runs`;
 }
 
-/* -------------------- UI HELPERS -------------------- */
+/* ---------------- UI HELPERS ---------------- */
 
 function showToast(message) {
   let toast = qs(".dpl-toast");
@@ -386,7 +509,7 @@ function addLiveClock() {
   }, 1000);
 }
 
-/* -------------------- PUBLIC RENDER -------------------- */
+/* ---------------- PUBLIC RENDER ---------------- */
 
 function renderAll() {
   dpl.matches.forEach(ensureScorecards);
@@ -439,7 +562,7 @@ function renderHome() {
     const score = calculateTeamScore(match, match.battingTeam);
     homeScore.innerHTML = `
       <span>${score.runs}<span class="wicket">/${score.wickets}</span></span>
-      <small>${score.balls} Balls • RR ${score.rr}</small>
+      <small>${score.balls} Balls • RR ${score.rr} • Extras ${score.extras}</small>
     `;
   }
 
@@ -483,7 +606,7 @@ function renderLiveScorePanel(match, index) {
         <div>
           <strong>${escapeHTML(match.teamA)}</strong>
           <div class="score-number">${a.runs}<span class="wickets">/${a.wickets}</span></div>
-          <small>${a.balls} Balls • RR ${a.rr}</small>
+          <small>${a.balls} Balls • RR ${a.rr} • Extras ${a.extras}</small>
         </div>
 
         <div class="score-center">
@@ -494,7 +617,7 @@ function renderLiveScorePanel(match, index) {
         <div>
           <strong>${escapeHTML(match.teamB)}</strong>
           <div class="score-number">${b.runs}<span class="wickets">/${b.wickets}</span></div>
-          <small>${b.balls} Balls • RR ${b.rr}</small>
+          <small>${b.balls} Balls • RR ${b.rr} • Extras ${b.extras}</small>
         </div>
       </div>
 
@@ -567,11 +690,13 @@ function renderLeaderboard() {
   const rows = dpl.teams.map((team) => {
     const completed = dpl.completedMatches.filter((m) => m.teamA === team.name || m.teamB === team.name);
     const wins = completed.filter((m) => m.winner === team.name).length;
+
     const runsFor = completed.reduce((sum, m) => {
       if (m.teamA === team.name) return sum + m.finalA.runs;
       if (m.teamB === team.name) return sum + m.finalB.runs;
       return sum;
     }, 0);
+
     const runsAgainst = completed.reduce((sum, m) => {
       if (m.teamA === team.name) return sum + m.finalB.runs;
       if (m.teamB === team.name) return sum + m.finalA.runs;
@@ -583,7 +708,7 @@ function renderLeaderboard() {
       matches: completed.length,
       wins,
       points: wins * 2,
-      nrr: (runsFor - runsAgainst).toFixed(0),
+      nrr: runsFor - runsAgainst,
     };
   });
 
@@ -632,7 +757,9 @@ function renderAwards() {
   const orange = [...batting].sort((a, b) => b.calc.runs - a.calc.runs)[0];
   const striker = [...batting].sort((a, b) => Number(b.calc.sr) - Number(a.calc.sr))[0];
   const purple = [...bowling].sort((a, b) => num(b.wickets) + num(b.specificWickets) - (num(a.wickets) + num(a.specificWickets)))[0];
-  const economyBest = [...bowling].filter((b) => num(b.ballsBowled) > 0).sort((a, b) => Number(economy(a.runsConceded, a.ballsBowled)) - Number(economy(b.runsConceded, b.ballsBowled)))[0];
+  const economyBest = [...bowling]
+    .filter((b) => num(b.ballsBowled) > 0)
+    .sort((a, b) => Number(economy(a.runsConceded, a.ballsBowled)) - Number(economy(b.runsConceded, b.ballsBowled)))[0];
 
   caps.innerHTML = `
     ${awardCard("🟠 Orange Cap", orange?.name, orange?.calc.runs || 0)}
@@ -695,21 +822,33 @@ function renderRules() {
   const formula = qs("#scoringFormula");
   if (!grid) return;
 
-  grid.innerHTML = Object.values(SCORING_RULES)
-    .map(
-      (rule) => `
-        <article class="score-tile">
-          <span>${rule.runs}R</span>
-          <strong>${escapeHTML(rule.label)} / ${rule.balls} Ball</strong>
-        </article>
-      `
-    )
-    .join("");
+  grid.innerHTML = `
+    ${Object.values(dpl.scoringRules || {})
+      .map(
+        (rule) => `
+          <article class="score-tile">
+            <span>${rule.runs}R</span>
+            <strong>${escapeHTML(rule.label)} / ${rule.balls} Ball</strong>
+          </article>
+        `
+      )
+      .join("")}
+    ${Object.values(dpl.extraRules || {})
+      .map(
+        (rule) => `
+          <article class="score-tile accent-blue">
+            <span>${rule.runs}R</span>
+            <strong>${escapeHTML(rule.label)} / Team Extra</strong>
+          </article>
+        `
+      )
+      .join("")}
+  `;
 
-  if (formula) formula.textContent = "Runs, Balls, Wickets, Powerplay, Imposter & Half-Score Engine Active";
+  if (formula) formula.textContent = "Runs, Balls, Wickets, Powerplay, Imposter, Team Extras & Half-Score Engine Active";
 }
 
-/* -------------------- MODAL -------------------- */
+/* ---------------- MODAL ---------------- */
 
 function openMatchModal(index, collection) {
   const match = collection === "matches" ? dpl.matches[index] : dpl.completedMatches[index];
@@ -748,8 +887,11 @@ function openMatchModal(index, collection) {
       <h3>Batting Scorecard</h3>
       ${battingTable(match)}
 
-      <h3>Bowling Scorecard</h3>
+      <h3>Bowling Scorecard — 3 Bowlers Per Team</h3>
       ${bowlingTable(match)}
+
+      <h3>Team Extras</h3>
+      ${teamExtrasTable(match)}
 
       <h3>Strategy</h3>
       <div class="score-meta">
@@ -772,7 +914,7 @@ function detailScore(team, score) {
     <article class="detail-team-score">
       <span>${escapeHTML(team)}</span>
       <strong>${score.runs}<small>/${score.wickets}</small></strong>
-      <small>${score.balls} Balls • RR ${score.rr}</small>
+      <small>${score.balls} Balls • RR ${score.rr} • Extras ${score.extras}</small>
     </article>
   `;
 }
@@ -852,12 +994,30 @@ function bowlingTable(match) {
   `;
 }
 
+function teamExtrasTable(match) {
+  const rows = [match.teamA, match.teamB]
+    .map((team) => {
+      const total = calculateTeamExtras(match, team);
+      return `<tr><td>${escapeHTML(team)}</td><td>${total}</td></tr>`;
+    })
+    .join("");
+
+  return `
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Team</th><th>Extra Runs</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
 function closeModal() {
   qsa(".match-modal").forEach((m) => m.remove());
   document.body.classList.remove("modal-open");
 }
 
-/* -------------------- ADMIN HELPERS -------------------- */
+/* ---------------- ADMIN HELPERS ---------------- */
 
 function isAuthed() {
   return sessionStorage.getItem(ADMIN_AUTH_KEY) === "yes";
@@ -881,18 +1041,6 @@ function textarea(label, id, value = "") {
   `;
 }
 
-function checked(id) {
-  return !!qs(`#${CSS.escape(id)}`)?.checked;
-}
-
-function val(id, fallback = "") {
-  return qs(`#${CSS.escape(id)}`)?.value.trim() ?? fallback;
-}
-
-function valNum(id, fallback = 0) {
-  return num(val(id, fallback), fallback);
-}
-
 function section(no, title, content) {
   return `
     <section class="admin-panel-card">
@@ -905,17 +1053,19 @@ function section(no, title, content) {
   `;
 }
 
-/* -------------------- ADVANCED ADMIN -------------------- */
+/* ---------------- ADMIN RENDER ---------------- */
 
 function renderAdmin() {
   const form = qs("#adminForm");
   if (!form) return;
 
+  dpl.matches.forEach(ensureScorecards);
+
   if (!isAuthed()) {
     form.innerHTML = `
       <div class="admin-login-card">
         <div class="admin-section-title"><span>PW</span><h3>Admin Login</h3></div>
-        <p class="admin-note">Enter password to manage the full DPL 2.0 engine.</p>
+        <p class="admin-note">Enter password to manage complete DPL 2.0 scoring.</p>
         ${field("Password", "adminPassword", "", "password")}
         <button class="btn btn-live" type="button" data-login>Unlock Admin Panel</button>
       </div>
@@ -923,13 +1073,11 @@ function renderAdmin() {
     return;
   }
 
-  dpl.matches.forEach(ensureScorecards);
-
   form.innerHTML = `
     <div class="admin-toolbar">
       <div>
         <p class="eyebrow">Advanced Control Room</p>
-        <h2>DPL 2.0 Full IPL Engine</h2>
+        <h2>DPL 2.0 Full Editable Engine</h2>
       </div>
       <div class="admin-toolbar-actions">
         <button class="mini-btn" type="button" data-export>Export</button>
@@ -939,13 +1087,15 @@ function renderAdmin() {
       </div>
     </div>
 
-    ${section("01", "League Settings", renderLeagueAdmin())}
-    ${section("02", "Teams & Owners", renderTeamsAdmin())}
-    ${section("03", "Live Matches & Strategy", renderMatchesAdmin())}
-    ${section("04", "Player Batting Scorecards", renderBattingAdmin())}
-    ${section("05", "Bowling Scorecards", renderBowlingAdmin())}
-    ${section("06", "Previous Results", renderCompletedAdmin())}
-    ${section("07", "Commentary", renderCommentaryAdmin())}
+    ${section("01", "Website & League Settings", renderLeagueAdmin())}
+    ${section("02", "Teams, Owners & Members", renderTeamsAdmin())}
+    ${section("03", "Editable Individual Scoring Criteria", renderScoringCriteriaAdmin())}
+    ${section("04", "Team Extras Scoring", renderTeamExtrasAdmin())}
+    ${section("05", "Live Matches, Toss, Openers, Imposters & 3 Bowlers", renderMatchesAdmin())}
+    ${section("06", "Player Batting Scorecards", renderBattingAdmin())}
+    ${section("07", "Only 3 Bowlers Per Team", renderBowlingAdmin())}
+    ${section("08", "Previous Results", renderCompletedAdmin())}
+    ${section("09", "Commentary", renderCommentaryAdmin())}
 
     <div class="admin-actions">
       <button class="btn btn-live" type="submit">Save All Updates</button>
@@ -997,6 +1147,74 @@ function renderTeamsAdmin() {
   `;
 }
 
+function renderScoringCriteriaAdmin() {
+  return `
+    <p class="admin-note">These criteria apply only to individual member batting score. Team Meetup and Power Date are handled separately as team extras.</p>
+    <div class="admin-rows">
+      ${Object.entries(dpl.scoringRules || {})
+        .map(
+          ([key, rule]) => `
+          <div class="admin-row">
+            ${field("Rule Key", `rule-${key}-key`, key)}
+            ${field("Label", `rule-${key}-label`, rule.label)}
+            ${field("Runs", `rule-${key}-runs`, rule.runs, "number")}
+            ${field("Balls", `rule-${key}-balls`, rule.balls, "number")}
+            <button class="icon-btn" type="button" data-remove-rule="${key}">Remove</button>
+          </div>
+        `
+        )
+        .join("")}
+    </div>
+    <button class="mini-btn" type="button" data-add-rule>Add Scoring Criteria</button>
+  `;
+}
+
+function renderTeamExtrasAdmin() {
+  return `
+    <p class="admin-note">Team extras are added directly to the team total, not to individual member score.</p>
+
+    <h3>Extra Rules</h3>
+    <div class="admin-rows">
+      ${Object.entries(dpl.extraRules || {})
+        .map(
+          ([key, rule]) => `
+          <div class="admin-row">
+            ${field("Extra Key", `extra-rule-${key}-key`, key)}
+            ${field("Label", `extra-rule-${key}-label`, rule.label)}
+            ${field("Runs", `extra-rule-${key}-runs`, rule.runs, "number")}
+            <button class="icon-btn" type="button" data-remove-extra-rule="${key}">Remove</button>
+          </div>
+        `
+        )
+        .join("")}
+    </div>
+    <button class="mini-btn" type="button" data-add-extra-rule>Add Team Extra Criteria</button>
+
+    <h3>Match-wise Team Extras</h3>
+    <div class="admin-rows">
+      ${dpl.matches
+        .map(
+          (match, mi) => `
+          <div class="admin-row admin-row-wide">
+            <strong>Match ${match.matchNo}: ${escapeHTML(match.teamA)} vs ${escapeHTML(match.teamB)}</strong>
+            ${Object.entries(dpl.extraRules || {})
+              .map(
+                ([key, rule]) => `
+                ${field(`${match.teamA} - ${rule.label}`, `extra-${mi}-A-${key}`, match.teamExtras?.[match.teamA]?.[key] || 0, "number")}
+                ${field(`${match.teamB} - ${rule.label}`, `extra-${mi}-B-${key}`, match.teamExtras?.[match.teamB]?.[key] || 0, "number")}
+              `
+              )
+              .join("")}
+            ${field(`${match.teamA} Manual +/- Runs`, `extra-${mi}-teamA-adjust`, match.teamAExtraAdjustment || 0, "number")}
+            ${field(`${match.teamB} Manual +/- Runs`, `extra-${mi}-teamB-adjust`, match.teamBExtraAdjustment || 0, "number")}
+          </div>
+        `
+        )
+        .join("")}
+    </div>
+  `;
+}
+
 function renderMatchesAdmin() {
   return `
     <div class="admin-rows">
@@ -1016,8 +1234,8 @@ function renderMatchesAdmin() {
             ${field("Toss Decision", `match-${i}-tossDecision`, m.tossDecision)}
             ${textarea("Team A Openers", `match-${i}-teamAOpeners`, (m.teamAOpeners || []).join("\n"))}
             ${textarea("Team B Openers", `match-${i}-teamBOpeners`, (m.teamBOpeners || []).join("\n"))}
-            ${textarea("Team A Bowlers", `match-${i}-teamABowlers`, (m.teamABowlers || []).join("\n"))}
-            ${textarea("Team B Bowlers", `match-${i}-teamBBowlers`, (m.teamBBowlers || []).join("\n"))}
+            ${textarea("Team A Bowlers - Only 3", `match-${i}-teamABowlers`, (m.teamABowlers || []).slice(0, 3).join("\n"))}
+            ${textarea("Team B Bowlers - Only 3", `match-${i}-teamBBowlers`, (m.teamBBowlers || []).slice(0, 3).join("\n"))}
             ${field("Team A Imposter", `match-${i}-teamAImposter`, m.teamAImposter)}
             ${field("Team B Imposter", `match-${i}-teamBImposter`, m.teamBImposter)}
 
@@ -1049,20 +1267,11 @@ function renderBattingAdmin() {
             <div class="admin-row admin-row-wide">
               ${field("Player", `bat-${mi}-${pi}-name`, p.name)}
               ${field("Team", `bat-${mi}-${pi}-team`, p.team)}
-              ${field("Present", `bat-${mi}-${pi}-present`, p.activities?.present || 0, "number")}
-              ${field("Substitute", `bat-${mi}-${pi}-substitute`, p.activities?.substitute || 0, "number")}
-              ${field("Medical", `bat-${mi}-${pi}-medical`, p.activities?.medical || 0, "number")}
-              ${field("Testimonial", `bat-${mi}-${pi}-testimonial`, p.activities?.testimonial || 0, "number")}
-              ${field("1-2-1", `bat-${mi}-${pi}-oneToOne`, p.activities?.oneToOne || 0, "number")}
-              ${field("Referral Inside", `bat-${mi}-${pi}-referralInside`, p.activities?.referralInside || 0, "number")}
-              ${field("Referral Outside", `bat-${mi}-${pi}-referralOutside`, p.activities?.referralOutside || 0, "number")}
-              ${field("Paid Visitor", `bat-${mi}-${pi}-paidVisitor`, p.activities?.paidVisitor || 0, "number")}
-              ${field("Visitor Attended", `bat-${mi}-${pi}-visitorAttended`, p.activities?.visitorAttended || 0, "number")}
-              ${field("Training", `bat-${mi}-${pi}-training`, p.activities?.training || 0, "number")}
-              ${field("TYFCB Lakhs", `bat-${mi}-${pi}-tyfcb`, p.activities?.tyfcb || 0, "number")}
-              ${field("Induction", `bat-${mi}-${pi}-induction`, p.activities?.induction || 0, "number")}
-              ${field("Meetup", `bat-${mi}-${pi}-meetup`, p.activities?.meetup || 0, "number")}
-              ${field("Power Date", `bat-${mi}-${pi}-powerDate`, p.activities?.powerDate || 0, "number")}
+
+              ${Object.entries(dpl.scoringRules || {})
+                .map(([key, rule]) => field(rule.label, `bat-${mi}-${pi}-${key}`, p.activities?.[key] || 0, "number"))
+                .join("")}
+
               ${field("Penalty Runs", `bat-${mi}-${pi}-penaltyRuns`, p.penaltyRuns || 0, "number")}
               ${field("Manual Bonus Runs", `bat-${mi}-${pi}-manualBonusRuns`, p.manualBonusRuns || 0, "number")}
               ${field("Manual Balls", `bat-${mi}-${pi}-manualBalls`, p.manualBalls || 0, "number")}
@@ -1070,7 +1279,7 @@ function renderBattingAdmin() {
 
               <label class="field checkbox-field">
                 <input id="bat-${mi}-${pi}-out" type="checkbox" ${p.out ? "checked" : ""} />
-                <span>OUT / Half Score Active</span>
+                <span>OUT / Future Score Half</span>
               </label>
             </div>
           `
@@ -1087,6 +1296,8 @@ function renderBowlingAdmin() {
     .map(
       (match, mi) => `
       <h3>Match ${match.matchNo}: ${escapeHTML(match.teamA)} vs ${escapeHTML(match.teamB)}</h3>
+      <p class="admin-note">Only selected 3 bowlers per team appear here.</p>
+
       <div class="admin-rows">
         ${(match.bowlingStats || [])
           .map(
@@ -1150,7 +1361,7 @@ function renderCommentaryAdmin() {
   `;
 }
 
-/* -------------------- ADMIN DATA COLLECTION -------------------- */
+/* ---------------- ADMIN COLLECT ---------------- */
 
 function collectAdminData() {
   dpl.league.title = val("league-title", dpl.league.title);
@@ -1165,11 +1376,31 @@ function collectAdminData() {
     name: val(`team-${i}-name`, team.name),
     owner: val(`team-${i}-owner`, team.owner),
     group: val(`team-${i}-group`, team.group),
-    players: val(`team-${i}-players`, "")
-      .split("\n")
-      .map((x) => x.trim())
-      .filter(Boolean),
+    players: splitLines(val(`team-${i}-players`, "")),
   }));
+
+  const nextRules = {};
+  Object.keys(dpl.scoringRules || {}).forEach((oldKey) => {
+    const newKey = val(`rule-${oldKey}-key`, oldKey);
+    if (!newKey) return;
+    nextRules[newKey] = {
+      label: val(`rule-${oldKey}-label`, dpl.scoringRules[oldKey].label),
+      runs: valNum(`rule-${oldKey}-runs`, dpl.scoringRules[oldKey].runs),
+      balls: valNum(`rule-${oldKey}-balls`, dpl.scoringRules[oldKey].balls),
+    };
+  });
+  dpl.scoringRules = nextRules;
+
+  const nextExtraRules = {};
+  Object.keys(dpl.extraRules || {}).forEach((oldKey) => {
+    const newKey = val(`extra-rule-${oldKey}-key`, oldKey);
+    if (!newKey) return;
+    nextExtraRules[newKey] = {
+      label: val(`extra-rule-${oldKey}-label`, dpl.extraRules[oldKey].label),
+      runs: valNum(`extra-rule-${oldKey}-runs`, dpl.extraRules[oldKey].runs),
+    };
+  });
+  dpl.extraRules = nextExtraRules;
 
   dpl.matches = dpl.matches.map((m, i) => {
     const updated = {
@@ -1184,40 +1415,44 @@ function collectAdminData() {
       innings: val(`match-${i}-innings`, m.innings),
       tossWinner: val(`match-${i}-tossWinner`, m.tossWinner),
       tossDecision: val(`match-${i}-tossDecision`, m.tossDecision),
-      teamAOpeners: val(`match-${i}-teamAOpeners`, "").split("\n").map((x) => x.trim()).filter(Boolean),
-      teamBOpeners: val(`match-${i}-teamBOpeners`, "").split("\n").map((x) => x.trim()).filter(Boolean),
-      teamABowlers: val(`match-${i}-teamABowlers`, "").split("\n").map((x) => x.trim()).filter(Boolean),
-      teamBBowlers: val(`match-${i}-teamBBowlers`, "").split("\n").map((x) => x.trim()).filter(Boolean),
+      teamAOpeners: splitLines(val(`match-${i}-teamAOpeners`, "")),
+      teamBOpeners: splitLines(val(`match-${i}-teamBOpeners`, "")),
+      teamABowlers: splitLines(val(`match-${i}-teamABowlers`, "")).slice(0, 3),
+      teamBBowlers: splitLines(val(`match-${i}-teamBBowlers`, "")).slice(0, 3),
       teamAImposter: val(`match-${i}-teamAImposter`, m.teamAImposter),
       teamBImposter: val(`match-${i}-teamBImposter`, m.teamBImposter),
       powerplay: checked(`match-${i}-powerplay`),
     };
 
-    updated.battingStats = (m.battingStats || []).map((p, pi) => ({
-      name: val(`bat-${i}-${pi}-name`, p.name),
-      team: val(`bat-${i}-${pi}-team`, p.team),
-      activities: {
-        present: valNum(`bat-${i}-${pi}-present`, 0),
-        substitute: valNum(`bat-${i}-${pi}-substitute`, 0),
-        medical: valNum(`bat-${i}-${pi}-medical`, 0),
-        testimonial: valNum(`bat-${i}-${pi}-testimonial`, 0),
-        oneToOne: valNum(`bat-${i}-${pi}-oneToOne`, 0),
-        referralInside: valNum(`bat-${i}-${pi}-referralInside`, 0),
-        referralOutside: valNum(`bat-${i}-${pi}-referralOutside`, 0),
-        paidVisitor: valNum(`bat-${i}-${pi}-paidVisitor`, 0),
-        visitorAttended: valNum(`bat-${i}-${pi}-visitorAttended`, 0),
-        training: valNum(`bat-${i}-${pi}-training`, 0),
-        tyfcb: valNum(`bat-${i}-${pi}-tyfcb`, 0),
-        induction: valNum(`bat-${i}-${pi}-induction`, 0),
-        meetup: valNum(`bat-${i}-${pi}-meetup`, 0),
-        powerDate: valNum(`bat-${i}-${pi}-powerDate`, 0),
-      },
-      out: checked(`bat-${i}-${pi}-out`),
-      wicketReason: val(`bat-${i}-${pi}-wicketReason`, ""),
-      penaltyRuns: valNum(`bat-${i}-${pi}-penaltyRuns`, 0),
-      manualBonusRuns: valNum(`bat-${i}-${pi}-manualBonusRuns`, 0),
-      manualBalls: valNum(`bat-${i}-${pi}-manualBalls`, 0),
-    }));
+    updated.teamExtras = updated.teamExtras || {};
+    updated.teamExtras[updated.teamA] = updated.teamExtras[updated.teamA] || {};
+    updated.teamExtras[updated.teamB] = updated.teamExtras[updated.teamB] || {};
+
+    Object.keys(dpl.extraRules || {}).forEach((key) => {
+      updated.teamExtras[updated.teamA][key] = valNum(`extra-${i}-A-${key}`, updated.teamExtras?.[updated.teamA]?.[key] || 0);
+      updated.teamExtras[updated.teamB][key] = valNum(`extra-${i}-B-${key}`, updated.teamExtras?.[updated.teamB]?.[key] || 0);
+    });
+
+    updated.teamAExtraAdjustment = valNum(`extra-${i}-teamA-adjust`, updated.teamAExtraAdjustment || 0);
+    updated.teamBExtraAdjustment = valNum(`extra-${i}-teamB-adjust`, updated.teamBExtraAdjustment || 0);
+
+    updated.battingStats = (m.battingStats || []).map((p, pi) => {
+      const activities = {};
+      Object.keys(dpl.scoringRules || {}).forEach((key) => {
+        activities[key] = valNum(`bat-${i}-${pi}-${key}`, p.activities?.[key] || 0);
+      });
+
+      return {
+        name: val(`bat-${i}-${pi}-name`, p.name),
+        team: val(`bat-${i}-${pi}-team`, p.team),
+        activities,
+        out: checked(`bat-${i}-${pi}-out`),
+        wicketReason: val(`bat-${i}-${pi}-wicketReason`, ""),
+        penaltyRuns: valNum(`bat-${i}-${pi}-penaltyRuns`, 0),
+        manualBonusRuns: valNum(`bat-${i}-${pi}-manualBonusRuns`, 0),
+        manualBalls: valNum(`bat-${i}-${pi}-manualBalls`, 0),
+      };
+    });
 
     updated.bowlingStats = (m.bowlingStats || []).map((p, pi) => ({
       name: val(`bowl-${i}-${pi}-name`, p.name),
@@ -1229,6 +1464,7 @@ function collectAdminData() {
       runsConceded: valNum(`bowl-${i}-${pi}-runsConceded`, 0),
     }));
 
+    ensureScorecards(updated);
     return updated;
   });
 
@@ -1248,7 +1484,7 @@ function collectAdminData() {
   }));
 }
 
-/* -------------------- ADMIN ACTIONS -------------------- */
+/* ---------------- ACTIONS ---------------- */
 
 document.addEventListener("click", (event) => {
   if (event.target.matches("[data-login]")) {
@@ -1275,6 +1511,40 @@ document.addEventListener("click", (event) => {
   if (event.target.matches("[data-remove-team]")) {
     collectAdminData();
     dpl.teams.splice(num(event.target.dataset.removeTeam), 1);
+    saveData();
+    renderAll();
+    renderAdmin();
+  }
+
+  if (event.target.matches("[data-add-rule]")) {
+    collectAdminData();
+    const key = `rule${Date.now()}`;
+    dpl.scoringRules[key] = { label: "New Criteria", runs: 1, balls: 1 };
+    saveData();
+    renderAll();
+    renderAdmin();
+  }
+
+  if (event.target.matches("[data-remove-rule]")) {
+    collectAdminData();
+    delete dpl.scoringRules[event.target.dataset.removeRule];
+    saveData();
+    renderAll();
+    renderAdmin();
+  }
+
+  if (event.target.matches("[data-add-extra-rule]")) {
+    collectAdminData();
+    const key = `extra${Date.now()}`;
+    dpl.extraRules[key] = { label: "New Team Extra", runs: 1 };
+    saveData();
+    renderAll();
+    renderAdmin();
+  }
+
+  if (event.target.matches("[data-remove-extra-rule]")) {
+    collectAdminData();
+    delete dpl.extraRules[event.target.dataset.removeExtraRule];
     saveData();
     renderAll();
     renderAdmin();
@@ -1356,7 +1626,7 @@ document.addEventListener("click", (event) => {
   if (event.target.matches("[data-reset]")) {
     if (!confirm("Reset all DPL data?")) return;
     localStorage.removeItem(STORAGE_KEY);
-    dpl = clone(defaultData);
+    dpl = normalizeData(clone(defaultData));
     renderAll();
     renderAdmin();
   }
@@ -1403,7 +1673,7 @@ function completeMatch(index) {
   });
 }
 
-/* -------------------- INIT -------------------- */
+/* ---------------- INIT ---------------- */
 
 document.addEventListener("DOMContentLoaded", () => {
   renderAll();

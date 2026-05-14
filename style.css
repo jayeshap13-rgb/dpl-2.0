@@ -1149,3 +1149,41 @@ select:focus {
     border-radius: 16px;
   }
 }
+.admin-tabs {
+  position: sticky;
+  top: 84px;
+  z-index: 50;
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(4, 5, 10, 0.88);
+  backdrop-filter: blur(18px);
+  box-shadow: var(--shadow);
+}
+
+.admin-tab-active {
+  background: linear-gradient(135deg, var(--orange), var(--purple)) !important;
+  border-color: transparent !important;
+  color: #fff !important;
+  box-shadow: 0 0 24px rgba(255, 138, 31, 0.32);
+}
+
+.admin-tab-content {
+  animation: riseIn 0.35s ease both;
+}
+
+@media (max-width: 768px) {
+  .admin-tabs {
+    top: 120px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .admin-tabs .mini-btn {
+    width: 100%;
+  }
+}

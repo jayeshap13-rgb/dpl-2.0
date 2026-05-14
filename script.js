@@ -1679,3 +1679,112 @@ document.addEventListener("DOMContentLoaded", () => {
   renderAll();
   renderAdmin();
 });
+/* =====================================================
+   DPL ADMIN PANEL SECTION TABS
+   Paste at END of script.js
+===================================================== */
+
+let activeAdminTab = "league";
+
+function adminTabButton(id, label) {
+  return `
+    <button
+      class="mini-btn ${activeAdminTab === id ? "admin-tab-active" : ""}"
+      type="button"
+      data-admin-tab="${id}"
+    >
+      ${label}
+    </button>
+  `;
+}
+
+const oldRenderAdmin = renderAdmin;
+
+renderAdmin = function () {
+  const form = qs("#adminForm");
+  if (!form) return;
+
+  dpl.matches.forEach(ensureScorecards);
+
+  if (!isAuthed()) {
+    form.innerHTML = `
+      <div class="admin-login-card">
+        <div class="admin-section-title"><span>PW</span><h3>Admin Login</h3></div>
+        <p class="admin-note">Enter password to manage complete DPL 2.0 scoring.</p>
+        ${field("Password", "adminPassword", "", "password")}
+        <button class="btn btn-live" type="button" data-login>Unlock Admin Panel</button>
+      </div>
+    `;
+    return;
+  }
+
+  const tabContent = {
+    league: section("01", "Website & League Settings", renderLeagueAdmin()),
+    teams: section("02", "Teams, Owners & Members", renderTeamsAdmin()),
+    scoring: section("03", "Editable Individual Scoring Criteria", renderScoringCriteriaAdmin()),
+    extras: section("04", "Team Extras Scoring", renderTeamExtrasAdmin()),
+    matches: section("05", "Live Matches, Toss, Openers, Imposters & 3 Bowlers", renderMatchesAdmin()),
+    batting: section("06", "Player Batting Scorecards", renderBattingAdmin()),
+    bowling: section("07", "Only 3 Bowlers Per Team", renderBowlingAdmin()),
+    results: section("08", "Previous Results", renderCompletedAdmin()),
+    commentary: section("09", "Commentary", renderCommentaryAdmin()),
+  };
+
+  form.innerHTML = `
+    <div class="admin-toolbar">
+      <div>
+        <p class="eyebrow">Advanced Control Room</p>
+        <h2>DPL 2.0 Admin Panel</h2>
+        <p class="admin-note">Select one section below to edit. No more long scrolling.</p>
+      </div>
+
+      <div class="admin-toolbar-actions">
+        <button class="mini-btn" type="button" data-export>Export</button>
+        <button class="mini-btn" type="button" data-import>Import</button>
+        <button class="mini-btn" type="button" data-reset>Reset</button>
+        <button class="mini-btn" type="button" data-logout>Logout</button>
+      </div>
+    </div>
+
+    <div class="admin-tabs">
+      ${adminTabButton("league", "League")}
+      ${adminTabButton("teams", "Teams")}
+      ${adminTabButton("scoring", "Scoring")}
+      ${adminTabButton("extras", "Team Extras")}
+      ${adminTabButton("matches", "Matches")}
+      ${adminTabButton("batting", "Batting")}
+      ${adminTabButton("bowling", "Bowling")}
+      ${adminTabButton("results", "Results")}
+      ${adminTabButton("commentary", "Commentary")}
+    </div>
+
+    <div class="admin-tab-content">
+      ${tabContent[activeAdminTab] || tabContent.league}
+    </div>
+
+    <div class="admin-actions">
+      <button class="btn btn-live" type="submit">Save Updates</button>
+      <a class="btn btn-outline" href="dashboard.html">View Dashboard</a>
+    </div>
+  `;
+
+  form.onsubmit = (event) => {
+    event.preventDefault();
+    collectAdminData();
+    saveData();
+    renderAll();
+    renderAdmin();
+  };
+};
+
+document.addEventListener("click", function (event) {
+  const tab = event.target.closest("[data-admin-tab]");
+  if (!tab) return;
+
+  collectAdminData();
+  activeAdminTab = tab.dataset.adminTab;
+  saveData(false);
+  renderAdmin();
+});
+
+renderAdmin();
